@@ -8,8 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; -webkit-tap-highlight-color: transparent; }
         
+        /* Styles from Original */
         .input-base {
             width: 100%; background: white; border: 1px solid #cbd5e1; border-radius: 6px;
             padding: 8px; font-weight: 600; outline: none; transition: 0.2s;
@@ -39,124 +40,489 @@
 
         .tab-btn { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #64748b; transition: 0.2s; }
         .tab-btn.active { background: white; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* SPA Styles */
+        .page { display: none; padding-bottom: 120px; animation: fadeEffect 0.3s; }
+        .page.active { display: block; }
+        @keyframes fadeEffect { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+
+        /* Floating Action Button - FIXED CENTER */
+        .fab {
+            position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px;
+            background-color: #4f46e5; color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); z-index: 50;
+            transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="pb-32">
+<body class="bg-slate-100">
 
-    <!-- Navbar -->
-    <div class="bg-slate-900 text-white py-4 px-4 sticky top-0 z-50 shadow-md flex justify-between items-center">
-        <div>
-            <h1 class="text-lg font-bold">Efektivitas Running</h1>
-            <p class="text-slate-400 text-[10px]">Dashboard v3.0 Final</p>
+    <!-- Navbar Global -->
+    <div class="bg-slate-900 text-white py-4 px-4 sticky top-0 z-50 shadow-md flex justify-between items-center h-16">
+        <div class="flex items-center gap-3">
+            <button id="btnBack" onclick="nav('history')" class="hidden text-slate-300 hover:text-white"><i data-lucide="arrow-left"></i></button>
+            <div>
+                <h1 class="text-lg font-bold" id="navTitle">Riwayat Laporan</h1>
+                <p class="text-slate-400 text-[10px]" id="navSubtitle">List Tersimpan</p>
+            </div>
         </div>
-        <button onclick="window.scrollTo(0, document.body.scrollHeight)" class="bg-indigo-600 hover:bg-indigo-700 text-xs font-bold py-2 px-3 rounded">↓ Bawah</button>
+        <div class="flex gap-2">
+            <!-- Gear hanya di History -->
+            <button id="btnAdmin" onclick="nav('admin')" class="p-2 text-slate-400 hover:text-white rounded-full"><i data-lucide="settings"></i></button>
+            <!-- Update/Simpan hanya di Form -->
+            <button id="btnSave" onclick="saveData(false)" class="hidden bg-emerald-600 hover:bg-emerald-700 text-xs font-bold py-2 px-3 rounded flex items-center gap-1"><i data-lucide="save" class="w-4 h-4"></i> SIMPAN</button>
+        </div>
     </div>
 
-    <div class="max-w-3xl mx-auto px-4 mt-6 space-y-6">
+    <!-- ####### CONFIG FOR GOOGLE SHEETS ######## -->
+    <script>const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUnjU-7bq6pYIuicIW1AHWC7G7Iku4OXlG-ieibPLWYleCYeS1iv1Tf-w_L9JWals_zA/exec"; // Kosongkan jika pakai LocalStorage dulu</script>
+    <!-- ####### CONFIG FOR GOOGLE SHEETS ######## -->
+    
+    
+    <div class="max-w-3xl mx-auto mt-6 px-4">
 
-        <!-- 0. DATA OPERASI -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">0. Data Operasional</div>
-            <div class="p-4 space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shift</label><select id="inputShift" class="input-base"><option value="NIGHT SHIFT">🌙 NIGHT SHIFT</option><option value="DAY SHIFT">☀️ DAY SHIFT</option></select></div>
-                    <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tanggal</label><input type="date" id="inputTanggal" class="input-base"></div>
-                </div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Supervisor</label><div id="spvContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputSupervisorLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Foreman</label><div id="foremanContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputForemanLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Checker</label><div id="checkerContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputCheckerLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <div class="bg-blue-50 p-3 rounded border border-blue-100"><label class="text-[10px] font-bold text-blue-600 block">TIPPING ROM</label><input type="number" id="inputTippingRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-blue-900 outline-none"></div>
-                    <div class="bg-emerald-50 p-3 rounded border border-emerald-100"><label class="text-[10px] font-bold text-emerald-600 block">TRANSFER ROM</label><input type="number" id="inputTransferRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-emerald-900 outline-none"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 1. DURASI CONVEYOR -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
-                <div><h2 class="font-bold text-slate-700 text-sm">1. Durasi Conveyor</h2><p class="text-[10px] text-slate-400">Hitung Waktu Indikasi</p></div>
-                <div class="flex bg-slate-200 p-1 rounded-md"><button onclick="switchTab('SD1')" id="tab-SD1" class="tab-btn active">SD1</button><button onclick="switchTab('SD2')" id="tab-SD2" class="tab-btn">SD2</button><button onclick="switchTab('SD3')" id="tab-SD3" class="tab-btn">SD3</button></div>
-            </div>
-            <div class="p-4">
-                <div class="grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 text-center mb-2"><div class="col-span-1">#</div><div class="col-span-5">Mulai</div><div class="col-span-5">Selesai</div><div class="col-span-1">Del</div></div>
-                <div id="container-SD1" class="space-y-2"></div><div id="container-SD2" class="space-y-2 hidden"></div><div id="container-SD3" class="space-y-2 hidden"></div>
-                <button onclick="addTimeRow(activeSD)" class="mt-4 w-full py-3 border border-dashed border-slate-300 text-slate-500 font-bold text-xs rounded hover:bg-slate-50">+ Tambah Baris</button>
-                <div id="results" class="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
-                    <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD1 Indikasi</div><div id="res-SD1" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD1" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
-                    <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD2 Indikasi</div><div id="res-SD2" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD2" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
-                    <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD3 Indikasi</div><div id="res-SD3" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD3" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. UNIT RUNNING -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">2. Perhitungan Unit Running</div>
-            <div class="p-4 space-y-6">
-                <!-- MHA -->
-                <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-orange-500"></div><span class="text-xs font-bold text-slate-700">MHA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="mha-run-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="mha-run-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-malam">0</div></div></div></div>
-                <!-- KARUNIA -->
-                <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-xs font-bold text-slate-700">KARUNIA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="kai-run-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="kai-run-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-malam">0</div></div></div></div>
-                <!-- BUMA -->
-                <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-yellow-500"></div><span class="text-xs font-bold text-slate-700">BUMA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="buma-run-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="buma-run-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-malam">0</div></div></div></div>
-                <!-- Total -->
-                <div class="bg-slate-100 p-3 rounded flex justify-between items-center text-sm"><span class="font-bold text-slate-500">Total Hauling</span><span id="grand-total" class="font-black text-indigo-700 text-lg">0</span></div>
-            </div>
-        </section>
-
-        <!-- 3. UNIT SDT RUNNING -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
-                <h2 class="font-bold text-slate-700 text-sm">3. Unit SDT Running</h2>
-                <button onclick="toggleConfig()" class="text-[10px] text-blue-600 underline font-bold">Config</button>
-            </div>
-            <div class="p-4">
-                <div id="configPanel" class="hidden bg-blue-50 p-3 rounded-lg border border-blue-100 text-xs mb-4">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="flex gap-1"><input id="newUnit" placeholder="Unit Baru" class="input-base py-1"><button onclick="addMaster('unit')" class="bg-blue-600 text-white px-2 rounded">+</button></div>
-                        <div class="flex gap-1"><input id="newDriver" placeholder="Driver Baru" class="input-base py-1"><button onclick="addMaster('driver')" class="bg-emerald-600 text-white px-2 rounded">+</button></div>
-                    </div>
-                </div>
-                <div class="mb-4"><div id="unitBtnContainer" class="flex flex-wrap gap-2"></div></div>
-                <div id="sdtList" class="space-y-3"></div>
-                <div id="emptyMsg" class="text-center py-6 text-slate-300 text-xs italic border border-dashed rounded mt-2">Belum ada data. Klik tombol unit di atas.</div>
-            </div>
-        </section>
-
-        <!-- Buttons -->
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="copyReport(false)" class="bg-white border border-purple-200 text-purple-700 font-bold py-3 rounded-xl shadow-sm hover:bg-purple-50 text-xs">Salin SIANG</button>
-            <button onclick="copyReport(true)" class="bg-white border border-indigo-200 text-indigo-700 font-bold py-3 rounded-xl shadow-sm hover:bg-indigo-50 text-xs">Salin MALAM</button>
+        <!-- ================= PAGE 1: HISTORY ================= -->
+        <div id="page-history" class="page active">
+            <div id="history-container" class="space-y-3"></div>
+            <div id="loading" class="hidden text-center text-slate-400 text-xs py-4">Syncing Google Sheets...</div>
+            <div id="empty-history" class="hidden text-center py-10 text-slate-400 text-sm">Belum ada history laporan.</div>
+            
+            <button onclick="openCreate()" class="fab"><i data-lucide="plus" class="w-8 h-8"></i></button>
         </div>
 
+        <!-- ================= PAGE 2: ADMIN ================= -->
+        <div id="page-admin" class="page">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-slate-700">Data Master</h2>
+                <!-- TOMBOL SIMPAN KHUSUS ADMIN -->
+                <button onclick="saveToStorage()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded shadow-sm flex items-center gap-2">
+                    <i data-lucide="save" class="w-3 h-3"></i> Simpan & Sync
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 space-y-6" id="admin-content">
+                    <!-- Generated by JS -->
+                </div>
+                <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">
+                    Data ini digunakan untuk opsi dropdown/pilihan di form. <br>
+                    Tekan tombol "Simpan & Sync" di atas setelah mengubah data.
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 3: FORM ================= -->
+        <div id="page-form" class="page">
+            <input type="hidden" id="editId">
+
+            <!-- 0. DATA OPERASI -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">0. Data Operasional</div>
+                <div class="p-4 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shift</label><select id="inputShift" class="input-base"><option value="NIGHT SHIFT">🌙 NIGHT SHIFT</option><option value="DAY SHIFT">☀️ DAY SHIFT</option></select></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tanggal</label><input type="date" id="inputTanggal" class="input-base"></div>
+                    </div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Supervisor</label><div id="spvContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputSupervisorLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Foreman</label><div id="foremanContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputForemanLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Checker</label><div id="checkerContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputCheckerLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="bg-blue-50 p-3 rounded border border-blue-100"><label class="text-[10px] font-bold text-blue-600 block">TIPPING ROM</label><input type="number" id="inputTippingRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-blue-900 outline-none"></div>
+                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100"><label class="text-[10px] font-bold text-emerald-600 block">TRANSFER ROM</label><input type="number" id="inputTransferRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-emerald-900 outline-none"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. DURASI CONVEYOR -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
+                    <div><h2 class="font-bold text-slate-700 text-sm">1. Durasi Conveyor</h2><p class="text-[10px] text-slate-400">Hitung Waktu Indikasi</p></div>
+                    <div class="flex bg-slate-200 p-1 rounded-md"><button onclick="switchTab('SD1')" id="tab-SD1" class="tab-btn active">SD1</button><button onclick="switchTab('SD2')" id="tab-SD2" class="tab-btn">SD2</button><button onclick="switchTab('SD3')" id="tab-SD3" class="tab-btn">SD3</button></div>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 text-center mb-2"><div class="col-span-1">#</div><div class="col-span-5">Mulai</div><div class="col-span-5">Selesai</div><div class="col-span-1">Del</div></div>
+                    <div id="container-SD1" class="space-y-2"></div><div id="container-SD2" class="space-y-2 hidden"></div><div id="container-SD3" class="space-y-2 hidden"></div>
+                    <button onclick="addTimeRow(activeSD)" class="mt-4 w-full py-3 border border-dashed border-slate-300 text-slate-500 font-bold text-xs rounded hover:bg-slate-50">+ Tambah Baris</button>
+                    <div id="results" class="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD1 Indikasi</div><div id="res-SD1" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD1" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD2 Indikasi</div><div id="res-SD2" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD2" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD3 Indikasi</div><div id="res-SD3" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD3" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. UNIT RUNNING -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">2. Perhitungan Unit Running</div>
+                <div class="p-4 space-y-6">
+                    <!-- MHA -->
+                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-orange-500"></div><span class="text-xs font-bold text-slate-700">MHA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="mha-run-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="mha-run-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-malam">0</div></div></div></div>
+                    <!-- KARUNIA -->
+                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-xs font-bold text-slate-700">KARUNIA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="kai-run-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="kai-run-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-malam">0</div></div></div></div>
+                    <!-- BUMA -->
+                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-yellow-500"></div><span class="text-xs font-bold text-slate-700">BUMA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="buma-run-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="buma-run-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-malam">0</div></div></div></div>
+                    <!-- Total -->
+                    <div class="bg-slate-100 p-3 rounded flex justify-between items-center text-sm"><span class="font-bold text-slate-500">Total Hauling</span><span id="grand-total" class="font-black text-indigo-700 text-lg">0 Trip</span></div>
+                </div>
+            </section>
+
+            <!-- 3. UNIT SDT RUNNING -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="font-bold text-slate-700 text-sm">3. Unit SDT Running</h2>
+                    <button onclick="toggleConfig()" class="text-[10px] text-blue-600 underline font-bold">Config</button>
+                </div>
+                <div class="p-4">
+                    <div id="configPanel" class="hidden bg-blue-50 p-3 rounded-lg border border-blue-100 text-xs mb-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex gap-1"><input id="newUnit" placeholder="Unit Baru" class="input-base py-1"><button onclick="addMasterFromForm('unit')" class="bg-blue-600 text-white px-2 rounded">+</button></div>
+                            <div class="flex gap-1"><input id="newDriver" placeholder="Driver Baru" class="input-base py-1"><button onclick="addMasterFromForm('driver')" class="bg-emerald-600 text-white px-2 rounded">+</button></div>
+                        </div>
+                    </div>
+                    <div class="mb-4"><div id="unitBtnContainer" class="flex flex-wrap gap-2"></div></div>
+                    <div id="sdtList" class="space-y-3"></div>
+                    <div id="emptyMsg" class="text-center py-6 text-slate-300 text-xs italic border border-dashed rounded mt-2">Belum ada data. Klik tombol unit di atas.</div>
+                </div>
+            </section>
+
+            <!-- Buttons Form -->
+            <div class="grid grid-cols-2 gap-3 pb-8">
+                <!-- Tombol Salin sekarang juga Auto Simpan -->
+                <button onclick="copyReport(false)" class="bg-white border border-purple-200 text-purple-700 font-bold py-3 rounded-xl shadow-sm hover:bg-purple-50 text-xs flex justify-center items-center gap-2"><i data-lucide="sun" class="w-4 h-4"></i> Salin SIANG</button>
+                <button onclick="copyReport(true)" class="bg-white border border-indigo-200 text-indigo-700 font-bold py-3 rounded-xl shadow-sm hover:bg-indigo-50 text-xs flex justify-center items-center gap-2"><i data-lucide="moon" class="w-4 h-4"></i> Salin MALAM</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CUSTOM MODAL (Pengganti Prompt/Confirm) -->
+    <div id="customModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60]">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-11/12 max-w-sm transform transition-all scale-100">
+            <h3 id="modalTitle" class="font-bold text-lg mb-2 text-slate-800">Judul</h3>
+            <p id="modalMsg" class="text-sm text-slate-600 mb-4 hidden">Pesan konfirmasi...</p>
+            <input id="modalInput" type="text" class="input-base mb-4 hidden" placeholder="Ketik disini...">
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="px-4 py-2 text-slate-500 font-bold text-xs hover:bg-slate-100 rounded">BATAL</button>
+                <button id="modalActionBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs">OK</button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded shadow-xl text-xs hidden transition-all duration-300 transform translate-y-10">Teks berhasil disalin!</div>
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded shadow-xl text-xs hidden transition-all duration-300 transform translate-y-10 z-50">Teks berhasil disalin!</div>
 
     <script>
-        // --- DATA ---
-        const SPV = ['Ihsan R', 'Dicky F', 'Sopian'];
-        const FRM = ['Gunawan TC', 'Hardiansyah', 'Lewi S', 'Elimelek J', 'Andry K', 'Yulius R'];
-        const CHK = ['Indra R', 'Jemmie P', 'Ikram', 'Fahri T', 'Indra A', 'Andhy S', 'Agus', 'Angga', 'Henderi A', 'L Fauzan N', 'Nanda P'];
-        
+        // --- DATA MANAGEMENT ---
+        let appData = {
+            history: [],
+            masters: {
+                spv: ['Ihsan R', 'Dicky F', 'Sopian'],
+                foreman: ['Gunawan TC', 'Hardiansyah', 'Lewi S', 'Elimelek J', 'Andry K', 'Yulius R'],
+                checker: ['Indra R', 'Jemmie P', 'Ikram', 'Fahri T', 'Indra A', 'Andhy S', 'Agus', 'Angga', 'Henderi A', 'L Fauzan N', 'Nanda P'],
+                unit: ["01-F", "02-F", "03-F", "3A-F", "05-F", "08-P", "09-P", "10-P", "25-P"],
+                driver: ["Jeksen", "Saipul", "Julio", "Ardianur", "Suryadi", "Agung", "Faturahman"]
+            }
+        };
+
+        // --- GLOBAL STATE ---
         let activeSD = 'SD1';
         let conveyorData = { SD1:[], SD2:[], SD3:[] };
         let sdtData = [];
-        let masterUnits = ["01-F", "02-F", "03-F", "3A-F", "05-F", "08-P", "09-P", "10-P", "25-P"];
-        let masterDrivers = ["Jeksen", "Saipul", "Julio", "Ardianur", "Suryadi", "Agung", "Faturahman"];
+        let modalCallback = null;
 
+        // --- INIT ---
         window.onload = () => {
-            initChips('spvContainer', SPV); initChips('foremanContainer', FRM); initChips('checkerContainer', CHK);
-            renderUnitButtons();
-            addTimeRow('SD1'); addTimeRow('SD1'); addTimeRow('SD2'); addTimeRow('SD3');
-            document.getElementById('inputTanggal').value = new Date().toISOString().split('T')[0];
+            loadFromStorage();
             lucide.createIcons();
+            initChips();
+            renderUnitButtons();
+            renderHistory();
+            renderAdmin();
+            // Default tanggal hari ini
+            document.getElementById('inputTanggal').valueAsDate = new Date();
         };
 
-        // --- CORE FUNCTIONS ---
-        function initChips(id, list) { document.getElementById(id).innerHTML = list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join(''); }
+        function nav(pageId) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            const btnBack = document.getElementById('btnBack');
+            const btnAdmin = document.getElementById('btnAdmin');
+            const btnSave = document.getElementById('btnSave');
+            const navTitle = document.getElementById('navTitle');
+            const navSubtitle = document.getElementById('navSubtitle');
+
+            if(pageId === 'history') {
+                btnBack.classList.add('hidden');
+                btnAdmin.classList.remove('hidden');
+                btnSave.classList.add('hidden');
+                navTitle.innerText = "Riwayat Laporan";
+                navSubtitle.innerText = "List Tersimpan";
+                renderHistory();
+            } else if (pageId === 'form') {
+                btnBack.classList.remove('hidden');
+                btnAdmin.classList.add('hidden');
+                btnSave.classList.remove('hidden');
+                navTitle.innerText = document.getElementById('editId').value ? "Edit Laporan" : "Laporan Baru";
+                navSubtitle.innerText = "Form Input";
+            } else if (pageId === 'admin') {
+                btnBack.classList.remove('hidden');
+                btnAdmin.classList.add('hidden');
+                btnSave.classList.add('hidden');
+                navTitle.innerText = "Pengaturan";
+                navSubtitle.innerText = "Kelola Master Data";
+                renderAdmin();
+            }
+            window.scrollTo(0,0);
+        }
+
+        // --- MODAL SYSTEM (REPLACES PROMPT/CONFIRM) ---
+        function showModal(title, type, callback, msgText = '') {
+            const modal = document.getElementById('customModal');
+            const mTitle = document.getElementById('modalTitle');
+            const mInput = document.getElementById('modalInput');
+            const mMsg = document.getElementById('modalMsg');
+            const mBtn = document.getElementById('modalActionBtn');
+
+            mTitle.innerText = title;
+            modalCallback = callback;
+
+            if (type === 'input') {
+                mInput.classList.remove('hidden');
+                mMsg.classList.add('hidden');
+                mInput.value = '';
+                setTimeout(() => mInput.focus(), 100);
+            } else {
+                mInput.classList.add('hidden');
+                mMsg.classList.remove('hidden');
+                mMsg.innerText = msgText;
+            }
+
+            modal.classList.remove('hidden');
+            
+            mBtn.onclick = () => {
+                if (type === 'input') {
+                    if(mInput.value.trim()) {
+                        callback(mInput.value.trim());
+                        closeModal();
+                    }
+                } else {
+                    callback();
+                    closeModal();
+                }
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+            modalCallback = null;
+        }
+
+        // --- STORAGE & GOOGLE SHEETS ---
+        function loadFromStorage() {
+            const h = localStorage.getItem('chp_history');
+            const m = localStorage.getItem('chp_masters');
+            if(h) appData.history = JSON.parse(h);
+            if(m) appData.masters = JSON.parse(m);
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('chp_history', JSON.stringify(appData.history));
+            localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
+            
+            showToast("Data Tersimpan!");
+
+            // GOOGLE SHEETS SYNC
+            if(GOOGLE_SCRIPT_URL) {
+                document.getElementById('loading').classList.remove('hidden');
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'sync',
+                        history: appData.history,
+                        masters: appData.masters
+                    })
+                }).then(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    console.log("Synced to Cloud");
+                }).catch(e => console.error(e));
+            }
+        }
+
+        // --- HISTORY LOGIC ---
+        function renderHistory() {
+            const c = document.getElementById('history-container');
+            c.innerHTML = '';
+            if(appData.history.length === 0) {
+                document.getElementById('empty-history').classList.remove('hidden');
+            } else {
+                document.getElementById('empty-history').classList.add('hidden');
+                [...appData.history].reverse().forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-start";
+                    
+                    const d = new Date(item.tanggal);
+                    const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+
+                    el.innerHTML = `
+                        <div class="flex-1 cursor-pointer" onclick="loadReport('${item.id}')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${item.shift.includes('NIGHT') ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}">${item.shift}</span>
+                                <span class="text-xs font-bold text-slate-500">${dateStr}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-sm">Total Hauling: ${item.totalHauling}</h3>
+                            <div class="text-[10px] text-slate-400 mt-1 truncate max-w-[200px]">SPV: ${item.spv}</div>
+                        </div>
+                        <div class="flex flex-col gap-2 ml-2">
+                            <button onclick="loadReport('${item.id}')" class="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 text-slate-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="reqDeleteReport('${item.id}')" class="p-2 bg-red-50 hover:bg-red-100 rounded border border-red-100 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    `;
+                    c.appendChild(el);
+                });
+                lucide.createIcons();
+            }
+        }
+
+        function openCreate() {
+            resetForm();
+            nav('form');
+        }
+
+        function reqDeleteReport(id) {
+            showModal('Hapus Laporan?', 'confirm', () => {
+                appData.history = appData.history.filter(x => x.id !== id);
+                saveToStorage();
+                renderHistory();
+            }, 'Apakah Anda yakin ingin menghapus history ini?');
+        }
+
+        // --- FORM & SAVING LOGIC ---
+        function resetForm() {
+            document.getElementById('editId').value = '';
+            document.getElementById('inputShift').value = 'NIGHT SHIFT';
+            document.getElementById('inputTanggal').valueAsDate = new Date();
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+            document.getElementById('inputSupervisorLainnya').value = '';
+            document.getElementById('inputForemanLainnya').value = '';
+            document.getElementById('inputCheckerLainnya').value = '';
+            
+            ['mha','kai','buma'].forEach(k => {
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => document.getElementById(`${k}-${s}`).value = '');
+                document.getElementById(`${k}-res-siang`).innerText = '0';
+                document.getElementById(`${k}-res-malam`).innerText = '0';
+            });
+            document.getElementById('grand-total').innerText = '0 Trip';
+            document.getElementById('inputTippingRom').value = '';
+            document.getElementById('inputTransferRom').value = '';
+            
+            conveyorData = { SD1:[], SD2:[], SD3:[] };
+            ['SD1','SD2','SD3'].forEach(sd => {
+                document.getElementById(`container-${sd}`).innerHTML = '';
+                addTimeRow(sd); // Min 1 baris
+            });
+            sdtData = [];
+            renderSdtList();
+        }
+
+        function saveData(silent = false) {
+            const id = document.getElementById('editId').value || Date.now().toString();
+            const data = {
+                id: id,
+                timestamp: Date.now(),
+                shift: document.getElementById('inputShift').value,
+                tanggal: document.getElementById('inputTanggal').value,
+                spv: getChecked('spvContainer'),
+                foreman: getChecked('foremanContainer'),
+                checker: getChecked('checkerContainer'),
+                tipping: document.getElementById('inputTippingRom').value,
+                transfer: document.getElementById('inputTransferRom').value,
+                conveyor: conveyorData,
+                conveyorRes: {
+                    SD1: document.getElementById('eff-SD1').dataset.copy,
+                    SD2: document.getElementById('eff-SD2').dataset.copy,
+                    SD3: document.getElementById('eff-SD3').dataset.copy
+                },
+                inputs: {},
+                totalHauling: document.getElementById('grand-total').innerText,
+                sdt: sdtData
+            };
+
+            ['mha','kai','buma'].forEach(k => {
+                data.inputs[k] = {};
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => {
+                    data.inputs[k][s] = document.getElementById(`${k}-${s}`).value;
+                });
+            });
+
+            const existingIdx = appData.history.findIndex(x => x.id === id);
+            if(existingIdx > -1) {
+                appData.history[existingIdx] = data;
+            } else {
+                appData.history.push(data);
+            }
+
+            saveToStorage();
+            if(!silent) {
+                setTimeout(() => nav('history'), 500);
+            }
+        }
+
+        function loadReport(id) {
+            const data = appData.history.find(x => x.id === id);
+            if(!data) return;
+
+            resetForm();
+            document.getElementById('editId').value = data.id;
+            document.getElementById('inputShift').value = data.shift;
+            document.getElementById('inputTanggal').value = data.tanggal;
+            
+            const loadChecks = (cntId, str) => {
+                const arr = str.split(', ');
+                document.querySelectorAll(`#${cntId} input`).forEach(cb => {
+                    if(arr.includes(cb.value)) cb.checked = true;
+                });
+            };
+            loadChecks('spvContainer', data.spv);
+            loadChecks('foremanContainer', data.foreman);
+            loadChecks('checkerContainer', data.checker);
+
+            document.getElementById('inputTippingRom').value = data.tipping;
+            document.getElementById('inputTransferRom').value = data.transfer;
+
+            ['SD1','SD2','SD3'].forEach(sd => {
+                document.getElementById(`container-${sd}`).innerHTML = '';
+                conveyorData[sd] = data.conveyor[sd];
+                conveyorData[sd].forEach((row, idx) => renderTimeRow(sd, idx, row));
+                if(conveyorData[sd].length === 0) addTimeRow(sd);
+                calcConv(sd);
+            });
+
+            ['mha','kai','buma'].forEach(k => {
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => {
+                    document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || '';
+                });
+                calcUnit(k);
+            });
+
+            sdtData = data.sdt;
+            renderSdtList();
+
+            nav('form');
+        }
+
+        // --- ORIGINAL FORM LOGIC ---
+        function initChips() { 
+            const mk = (id, list) => document.getElementById(id).innerHTML = list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('');
+            mk('spvContainer', appData.masters.spv); 
+            mk('foremanContainer', appData.masters.foreman); 
+            mk('checkerContainer', appData.masters.checker);
+        }
 
         function switchTab(sd) {
             activeSD = sd;
@@ -168,14 +534,19 @@
 
         function addTimeRow(sd) {
             const idx = conveyorData[sd].length;
-            conveyorData[sd].push({ sh:'', sm:'', fh:'', fm:'' });
+            const emptyRow = { sh:'', sm:'', fh:'', fm:'' };
+            conveyorData[sd].push(emptyRow);
+            renderTimeRow(sd, idx, emptyRow);
+        }
+
+        function renderTimeRow(sd, idx, data) {
             const div = document.createElement('div');
             div.id = `row-${sd}-${idx}`;
             div.className = "grid grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm";
             div.innerHTML = `
                 <div class="col-span-1 text-center font-bold text-slate-300 text-xs">${idx+1}</div>
-                <div class="col-span-5 time-box"><input type="tel" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div>
-                <div class="col-span-5 time-box"><input type="tel" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div>
+                <div class="col-span-5 time-box"><input type="tel" value="${data.sh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" value="${data.sm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div>
+                <div class="col-span-5 time-box"><input type="tel" value="${data.fh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" value="${data.fm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div>
                 <div class="col-span-1 text-center"><button onclick="delTimeRow('${sd}',${idx})" class="text-slate-300 hover:text-red-500 font-bold">×</button></div>
             `;
             document.getElementById(`container-${sd}`).appendChild(div);
@@ -186,7 +557,6 @@
             if(v>23 && (f=='sh'||f=='fh')) v='23'; if(v>59 && (f=='sm'||f=='fm')) v='59';
             el.value=v; conveyorData[sd][idx][f]=v;
             calcConv(sd);
-            if(v.length==2) { let n=el.nextElementSibling; if(n&&n.tagName=='INPUT') n.focus(); }
         }
 
         function delTimeRow(sd, idx) {
@@ -208,9 +578,14 @@
             let rem = (12*60)-tot;
             const rh=Math.floor(Math.abs(rem)/60), rm=Math.abs(rem)%60;
             const el=document.getElementById(`eff-${sd}`);
-            if(tot===0) { el.innerText='-'; el.className="text-[10px] font-bold text-slate-300"; el.dataset.copy='-'; }
-            else if(rem>=0) { el.innerText=`${rh}j ${rm}m`; el.className="text-[10px] font-bold text-emerald-600"; el.dataset.copy=`${rh} Jam ${String(rm).padStart(2,'0')} Menit`; }
-            else { el.innerText=`${rh}j ${rm}m (Over)`; el.className="text-[10px] font-bold text-red-600"; el.dataset.copy=`${rh} Jam ${String(rm).padStart(2,'0')} Menit (Kelebihan Durasi)`; }
+            
+            if(tot===0) { 
+                el.innerText='-'; 
+                el.dataset.copy='-'; 
+            } else { 
+                el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; 
+                el.dataset.copy=`${th} Jam ${tm} Menit`; 
+            }
         }
 
         function calcUnit(id) {
@@ -222,19 +597,18 @@
             document.getElementById('grand-total').innerText = tot + " Trip";
         }
 
-        // --- SDT ---
+        // --- SDT & CONFIG ---
         function toggleConfig() { document.getElementById('configPanel').classList.toggle('hidden'); }
-        function addMaster(t) {
-            const el = document.getElementById(t==='unit'?'newUnit':'newDriver');
-            const v = el.value.trim();
-            if(v) {
-                if(t==='unit') { masterUnits.push(v.toUpperCase()); renderUnitButtons(); }
-                else { masterDrivers.push(v); renderSdtList(); }
-                el.value='';
-            }
+        function addMasterFromForm(type) {
+            showModal(`Tambah ${type}`, 'input', (val) => {
+                appData.masters[type].push(val.toUpperCase());
+                saveToStorage();
+                if(type==='unit') renderUnitButtons();
+                else renderSdtList();
+            });
         }
         function renderUnitButtons() {
-            document.getElementById('unitBtnContainer').innerHTML = masterUnits.map(u => 
+            document.getElementById('unitBtnContainer').innerHTML = appData.masters.unit.map(u => 
                 `<button onclick="addSdt('${u}')" class="bg-white border border-slate-300 text-xs font-bold text-slate-600 px-3 py-1 rounded shadow-sm hover:bg-indigo-50 hover:text-indigo-600 transition active:scale-95">${u}</button>`
             ).join('');
         }
@@ -246,7 +620,7 @@
             const m = document.getElementById('emptyMsg');
             if(sdtData.length === 0) { c.innerHTML = ''; m.style.display = 'block'; return; }
             m.style.display = 'none';
-            const drvOpts = `<option value="">Driver...</option>` + masterDrivers.map(d=>`<option value="${d}">${d}</option>`).join('');
+            const drvOpts = `<option value="">Driver...</option>` + appData.masters.driver.map(d=>`<option value="${d}">${d}</option>`).join('');
             c.innerHTML = sdtData.map((d,i) => `
                 <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-2 relative">
                     <div class="flex justify-between items-center border-b border-slate-50 pb-1">
@@ -263,7 +637,7 @@
             lucide.createIcons();
         }
 
-        // --- COPY ---
+        // --- COPY & GENERATE TEXT ---
         function getChecked(id) {
             const c = Array.from(document.querySelectorAll(`#${id} input:checked`)).map(e => e.parentElement.innerText.trim());
             let mId = ''; if(id.includes('spv')) mId = 'inputSupervisorLainnya'; if(id.includes('foreman')) mId = 'inputForemanLainnya'; if(id.includes('checker')) mId = 'inputCheckerLainnya';
@@ -271,34 +645,91 @@
         }
 
         function copyReport(isMalam) {
+            saveData(true);
             const shift = document.getElementById('inputShift').value;
-            const date = document.getElementById('inputTanggal').value.split('-');
+            const dateVal = document.getElementById('inputTanggal').value;
+            const date = dateVal.split('-');
             const fmtDate = date.length===3 ? `${date[2]}/${["JAN","FEB","MAR","APR","MEI","JUN","JUL","AGU","SEP","OKT","NOV","DES"][parseInt(date[1])-1]}/${date[0].slice(-2)}` : '-';
-
-            let txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\nSupervisor : ${getChecked('spvContainer')}\nForeman   : ${getChecked('foremanContainer')}\nChecker      : ${getChecked('checkerContainer')}\n\nEfektivitas Running\n`;
-            ['SD1','SD2','SD3'].forEach(sd => txt += `- ${sd} = ${(document.getElementById(`eff-${sd}`).dataset.copy||'-')}\n`);
-            txt += `\n`;
-
+            const getUnitCount = (vnd) => isMalam ? (document.getElementById(`${vnd}-run-malam`).value || 0) : (document.getElementById(`${vnd}-run-siang`).value || 0);
             const val = (id) => parseFloat(document.getElementById(id).value)||0;
-            const calc = (b) => isMalam ? (val(`${b}-trip-malam`)-val(`${b}-trip-siang`)) : val(`${b}-trip-siang`);
-            const mt=calc('mha'), kt=calc('kai'), bt=calc('buma'), tot=mt+kt+bt;
-            const tip=val('inputTippingRom'), trans=val('inputTransferRom');
+            const calcTrip = (b) => isMalam ? (val(`${b}-trip-malam`)-val(`${b}-trip-siang`)) : val(`${b}-trip-siang`);
 
-            txt += `Hauling\nMHA    : ${mt} TRIP\nBUMA   : ${bt} TRIP\nKAI    : ${kt} TRIP\nIP     : 0 TRIP\nTotal Hauling : ${tot} Trip\n\n`;
-            txt += `TIPPING ROM        = ${tip} Trip\nTRANSFER ROM   = ${trans} Trip\nTRANSFER ROM + HAULING = ${trans+tot} Trip\n\n`; // ADDED NEWLINE HERE
+            const tripMha = calcTrip('mha'), tripKai = calcTrip('kai'), tripBuma = calcTrip('buma');
+            const totHauling = tripMha + tripKai + tripBuma;
+            const tip = val('inputTippingRom'), trans = val('inputTransferRom');
+            const spv = getChecked('spvContainer') || '-', frm = getChecked('foremanContainer') || '-', chk = getChecked('checkerContainer') || '-';
 
-            const suf = isMalam ? 'malam' : 'siang';
-            txt += `Unit 2 Trip\n- MHA   = ${document.getElementById(`mha-res-${suf}`).innerText} Unit\n- BUMA  = ${document.getElementById(`buma-res-${suf}`).innerText} Unit\n- KAI   = ${document.getElementById(`kai-res-${suf}`).innerText} Unit\n\n`;
+            let sdtStr = sdtData.length > 0 ? sdtData.map(d => `- ${d.unit} (${d.driver||'-'}) : ${d.trip||0} Trip ${d.ket ? `(${d.ket})` : ''}`).join('\n') : "-\n";
+            const sd1 = document.getElementById('eff-SD1').dataset.copy, sd2 = document.getElementById('eff-SD2').dataset.copy, sd3 = document.getElementById('eff-SD3').dataset.copy;
 
-            txt += `Unit SDT Running:\n`;
-            if(sdtData.length === 0) txt += `(List Kosong)`;
-            else sdtData.forEach((d,i) => txt += `${i+1}.SDT ${d.unit} ${d.driver?`(${d.driver})`:''} : ${d.trip?d.trip+' Trip':''} ${d.ket?`*${d.ket}*`:''}\n`);
+            const txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\n*SUPERVISOR* : ${spv}\n*FOREMAN* : ${frm}\n*CHECKER* :  ${chk}\n\n*EFEKTIFITAS RUNNING*\n- SD1 = ${sd1}\n- SD2 = ${sd2}\n- SD3 = ${sd3}\n\n*HAULING*\n- MHA   = ${tripMha} TRIP\n- KARUNIA = ${tripKai} TRIP\n- BUMA  = ${tripBuma} TRIP\n\n*UNIT 2 TRIP*\n- MHA   = ${getUnitCount('mha')} Unit\n- KARUNIA = ${getUnitCount('kai')} Unit\n- BUMA  = ${getUnitCount('buma')} Unit\n\n*TRIP SDT TRANSFER*\n${sdtStr}\n\n*TOTAL HAULING   = ${totHauling} Trip*\n*TIPPING ROM        = ${tip} Trip*\n*TRANSFER ROM   = ${trans} Trip*\n*TRANSFER ROM + HAULING = ${trans + totHauling} Trip*`;
 
             const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
             document.execCommand('copy'); document.body.removeChild(ta);
-            const t = document.getElementById('toast'); t.classList.remove('hidden','translate-y-10');
-            setTimeout(()=>t.classList.add('translate-y-10'), 2000); setTimeout(()=>t.classList.add('hidden'), 2300);
+            const t = document.getElementById('toast'); 
+            t.classList.remove('hidden','translate-y-10');
+            setTimeout(()=>t.classList.add('translate-y-10'), 2000); 
+            setTimeout(()=>t.classList.add('hidden'), 2300);
         }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('hidden','translate-y-10');
+            setTimeout(()=>t.classList.add('translate-y-10'), 2000); 
+            setTimeout(()=>t.classList.add('hidden'), 2300);
+        }
+
+        // --- ADMIN PAGE LOGIC FIXED ---
+        function renderAdmin() {
+            const container = document.getElementById('admin-content');
+            container.innerHTML = '';
+            
+            const sections = [
+                {k:'spv', l:'Supervisor'}, {k:'foreman', l:'Foreman'}, {k:'checker', l:'Checker'},
+                {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'}
+            ];
+
+            sections.forEach(sec => {
+                let html = `
+                    <div class="border-b border-slate-100 pb-4 last:border-0">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-xs text-slate-500 uppercase">${sec.l}</h3>
+                            <button onclick="reqAddMaster('${sec.k}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">+ TAMBAH</button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                `;
+                appData.masters[sec.k].forEach(item => {
+                    html += `
+                        <div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+                            ${item}
+                            <button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function reqAddMaster(key) {
+            showModal(`Tambah ${key}`, 'input', (val) => {
+                appData.masters[key].push(val.toUpperCase());
+                saveToStorage();
+                renderAdmin();
+                initChips();
+            });
+        }
+        
+        function reqDelMaster(key, val) {
+            showModal(`Hapus ${val}?`, 'confirm', () => {
+                appData.masters[key] = appData.masters[key].filter(x => x !== val);
+                saveToStorage();
+                renderAdmin();
+                initChips();
+            }, 'Yakin ingin menghapus data master ini?');
+        }
+
     </script>
 </body>
 </html>
