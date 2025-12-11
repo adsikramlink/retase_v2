@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efektivitas Running - v3.0 Final</title>
+    <title>Efektivitas Running - v3.1 Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -38,8 +38,12 @@
         .fab:active { transform: scale(0.95); }
         
         /* Loading Overlay */
-        #sync-overlay { position: fixed; top:0; left:0; width:100%; height:4px; z-index: 999; background: transparent; }
-        .progress-bar { height: 100%; background: #4f46e5; width: 0%; transition: width 0.5s; }
+        #sync-overlay { position: fixed; top:0; left:0; width:100%; height:4px; z-index: 999; background: transparent; pointer-events: none;}
+        .progress-bar { height: 100%; background: #4f46e5; width: 0%; transition: width 0.3s; }
+        
+        /* Spinner */
+        .spinner { border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-100">
@@ -63,14 +67,17 @@
     </div>
 
     <!-- CONFIG FOR GOOGLE SHEETS -->
-    <script>const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2uP5Q2Xl7v_pqXB-dc9KIYi5cG5ccUoD4EZFtzG4PC9mqRYS_mYVfZPSbUqz7fq3-BA/exec"; // PASTE URL DISINI</script>
+    <!-- PASTE URL WEB APP GOOGLE SCRIPT ANDA DI BAWAH INI -->
+    <script>const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2SsLCoMnBGOZq696cZWXvg7j7_hmpBbWxd-H8nrDSl_VpvxXwhtSNuU16L_fPkOGj/exec";</script>
 
     <div class="max-w-3xl mx-auto mt-6 px-4">
 
         <!-- ================= PAGE 1: HISTORY ================= -->
         <div id="page-history" class="page active">
             <div id="history-container" class="space-y-3"></div>
-            <div id="loading" class="hidden text-center text-slate-400 text-xs py-4 animate-pulse">Sedang mengambil data Cloud...</div>
+            <div id="loading" class="hidden text-center text-slate-400 text-xs py-4 flex justify-center items-center gap-2">
+                <div class="spinner"></div> Mengambil data Cloud...
+            </div>
             <div id="empty-history" class="hidden text-center py-10 text-slate-400 text-sm">
                 Belum ada history laporan.<br>
                 <span class="text-[10px]">(Cek koneksi internet untuk load dari Cloud)</span>
@@ -83,15 +90,17 @@
         <div id="page-admin" class="page">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="font-bold text-slate-700">Data Master</h2>
-                <button onclick="forceSync()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded shadow-sm flex items-center gap-2">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Manual
+                <button onclick="forceSync()" class="bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-bold py-2 px-4 rounded shadow-sm flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh Data Cloud
                 </button>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div id="admin-loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center hidden"><div class="spinner border-slate-300 border-t-indigo-600 w-6 h-6"></div></div>
                 <div class="p-4 space-y-6" id="admin-content"></div>
                 <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">
-                    Data otomatis tersimpan ke Cloud setiap kali Anda menambah/menghapus.
+                    Setiap perubahan (Tambah/Hapus) akan otomatis disimpan ke Cloud. <br>
+                    User lain perlu menekan tombol <b>Refresh</b> untuk melihat perubahan.
                 </div>
             </div>
         </div>
@@ -217,12 +226,7 @@
         // --- INIT ---
         window.onload = () => {
             loadFromStorage();
-            
-            // AUTOMATIC SYNC FROM CLOUD
-            if (GOOGLE_SCRIPT_URL) {
-                syncDown(); 
-            }
-
+            if (GOOGLE_SCRIPT_URL) { syncDown(); }
             lucide.createIcons();
             initChips();
             renderUnitButtons();
@@ -265,7 +269,7 @@
             window.scrollTo(0,0);
         }
 
-        // --- STORAGE & GOOGLE SHEETS SYNC ---
+        // --- STORAGE & SYNC ---
         function loadFromStorage() {
             const h = localStorage.getItem('chp_history');
             const m = localStorage.getItem('chp_masters');
@@ -277,9 +281,10 @@
             localStorage.setItem('chp_history', JSON.stringify(appData.history));
             localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
             
-            // SYNC UP (PUSH)
             if(GOOGLE_SCRIPT_URL) {
                 document.getElementById('progressBar').style.width = '30%';
+                document.getElementById('admin-loading')?.classList.remove('hidden'); // Show spinner on admin if active
+                
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -290,9 +295,11 @@
                     })
                 }).then(() => {
                     document.getElementById('progressBar').style.width = '100%';
+                    document.getElementById('admin-loading')?.classList.add('hidden');
                     setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500);
-                    showToast("Data Disimpan & Disync!");
+                    showToast("Tersimpan ke Cloud!");
                 }).catch(e => {
+                    document.getElementById('admin-loading')?.classList.add('hidden');
                     showToast("Tersimpan Lokal (Offline)");
                     console.error(e);
                 });
@@ -301,7 +308,6 @@
             }
         }
 
-        // --- NEW: SYNC DOWN FUNCTION (RESTORE) ---
         async function syncDown() {
             const loading = document.getElementById('loading');
             loading.classList.remove('hidden');
@@ -311,22 +317,17 @@
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
 
-                if (data.history && Array.isArray(data.history)) {
-                    appData.history = data.history;
-                }
-                if (data.masters && typeof data.masters === 'object') {
-                    appData.masters = data.masters;
-                }
+                if (data.history && Array.isArray(data.history)) { appData.history = data.history; }
+                if (data.masters && typeof data.masters === 'object') { appData.masters = data.masters; }
                 
-                // Update Local & UI
                 localStorage.setItem('chp_history', JSON.stringify(appData.history));
                 localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
                 renderHistory();
                 renderAdmin();
-                initChips(); // Update dropdowns
+                initChips(); 
                 
                 document.getElementById('progressBar').style.width = '100%';
-                showToast("Data Dipulihkan dari Cloud!");
+                showToast("Data Dipulihkan!");
 
             } catch (err) {
                 console.error("Gagal Sync Down:", err);
@@ -336,11 +337,9 @@
             }
         }
 
-        function forceSync() {
-            syncDown();
-        }
+        function forceSync() { syncDown(); }
 
-        // --- MODAL SYSTEM ---
+        // --- MODAL ---
         function showModal(title, type, callback, msgText = '') {
             const modal = document.getElementById('customModal');
             const mTitle = document.getElementById('modalTitle');
@@ -363,26 +362,15 @@
             }
 
             modal.classList.remove('hidden');
-            
             mBtn.onclick = () => {
                 if (type === 'input') {
-                    if(mInput.value.trim()) {
-                        callback(mInput.value.trim());
-                        closeModal();
-                    }
-                } else {
-                    callback();
-                    closeModal();
-                }
+                    if(mInput.value.trim()) { callback(mInput.value.trim()); closeModal(); }
+                } else { callback(); closeModal(); }
             };
         }
+        function closeModal() { document.getElementById('customModal').classList.add('hidden'); modalCallback = null; }
 
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-            modalCallback = null;
-        }
-
-        // --- HISTORY LOGIC ---
+        // --- HISTORY ---
         function renderHistory() {
             const c = document.getElementById('history-container');
             c.innerHTML = '';
@@ -393,10 +381,8 @@
                 [...appData.history].reverse().forEach(item => {
                     const el = document.createElement('div');
                     el.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-start";
-                    
                     const d = new Date(item.tanggal);
                     const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
-
                     el.innerHTML = `
                         <div class="flex-1 cursor-pointer" onclick="loadReport('${item.id}')">
                             <div class="flex items-center gap-2 mb-1">
@@ -416,21 +402,16 @@
                 lucide.createIcons();
             }
         }
-
-        function openCreate() {
-            resetForm();
-            nav('form');
-        }
-
+        function openCreate() { resetForm(); nav('form'); }
         function reqDeleteReport(id) {
             showModal('Hapus Laporan?', 'confirm', () => {
                 appData.history = appData.history.filter(x => x.id !== id);
-                saveToStorage();
+                saveToStorage(); // Auto Save to Cloud on Delete
                 renderHistory();
-            }, 'Apakah Anda yakin ingin menghapus history ini?');
+            }, 'Yakin hapus history ini?');
         }
 
-        // --- FORM & SAVING LOGIC ---
+        // --- FORM LOGIC ---
         function resetForm() {
             document.getElementById('editId').value = '';
             document.getElementById('inputShift').value = 'NIGHT SHIFT';
@@ -480,46 +461,32 @@
                 totalHauling: document.getElementById('grand-total').innerText,
                 sdt: sdtData
             };
-
             ['mha','kai','buma'].forEach(k => {
                 data.inputs[k] = {};
-                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => {
-                    data.inputs[k][s] = document.getElementById(`${k}-${s}`).value;
-                });
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { data.inputs[k][s] = document.getElementById(`${k}-${s}`).value; });
             });
 
             const existingIdx = appData.history.findIndex(x => x.id === id);
-            if(existingIdx > -1) {
-                appData.history[existingIdx] = data;
-            } else {
-                appData.history.push(data);
-            }
+            if(existingIdx > -1) { appData.history[existingIdx] = data; } else { appData.history.push(data); }
 
-            saveToStorage();
-            if(!silent) {
-                setTimeout(() => nav('history'), 500);
-            }
+            saveToStorage(); // Auto Save to Cloud
+            if(!silent) { setTimeout(() => nav('history'), 500); }
         }
 
         function loadReport(id) {
             const data = appData.history.find(x => x.id === id);
             if(!data) return;
-
             resetForm();
             document.getElementById('editId').value = data.id;
             document.getElementById('inputShift').value = data.shift;
             document.getElementById('inputTanggal').value = data.tanggal;
-            
             const loadChecks = (cntId, str) => {
                 const arr = str.split(', ');
-                document.querySelectorAll(`#${cntId} input`).forEach(cb => {
-                    if(arr.includes(cb.value)) cb.checked = true;
-                });
+                document.querySelectorAll(`#${cntId} input`).forEach(cb => { if(arr.includes(cb.value)) cb.checked = true; });
             };
             loadChecks('spvContainer', data.spv);
             loadChecks('foremanContainer', data.foreman);
             loadChecks('checkerContainer', data.checker);
-
             document.getElementById('inputTippingRom').value = data.tipping;
             document.getElementById('inputTransferRom').value = data.transfer;
 
@@ -530,28 +497,22 @@
                 if(conveyorData[sd].length === 0) addTimeRow(sd);
                 calcConv(sd);
             });
-
             ['mha','kai','buma'].forEach(k => {
-                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => {
-                    document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || '';
-                });
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || ''; });
                 calcUnit(k);
             });
-
             sdtData = data.sdt;
             renderSdtList();
-
             nav('form');
         }
 
-        // --- ORIGINAL FORM LOGIC ---
+        // --- CHIPS & TIME ---
         function initChips() { 
             const mk = (id, list) => document.getElementById(id).innerHTML = list ? list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('') : '';
             mk('spvContainer', appData.masters.spv); 
             mk('foremanContainer', appData.masters.foreman); 
             mk('checkerContainer', appData.masters.checker);
         }
-
         function switchTab(sd) {
             activeSD = sd;
             ['SD1','SD2','SD3'].forEach(n => {
@@ -559,14 +520,12 @@
                 document.getElementById(`container-${n}`).className = `space-y-2 ${n===sd?'':'hidden'}`;
             });
         }
-
         function addTimeRow(sd) {
             const idx = conveyorData[sd].length;
             const emptyRow = { sh:'', sm:'', fh:'', fm:'' };
             conveyorData[sd].push(emptyRow);
             renderTimeRow(sd, idx, emptyRow);
         }
-
         function renderTimeRow(sd, idx, data) {
             const div = document.createElement('div');
             div.id = `row-${sd}-${idx}`;
@@ -579,20 +538,17 @@
             `;
             document.getElementById(`container-${sd}`).appendChild(div);
         }
-
         function updTime(sd, idx, f, el) {
             let v = el.value.replace(/\D/g,''); if(v.length>2) v=v.slice(0,2);
             if(v>23 && (f=='sh'||f=='fh')) v='23'; if(v>59 && (f=='sm'||f=='fm')) v='59';
             el.value=v; conveyorData[sd][idx][f]=v;
             calcConv(sd);
         }
-
         function delTimeRow(sd, idx) {
             document.getElementById(`row-${sd}-${idx}`).style.display='none';
             conveyorData[sd][idx] = { sh:'', sm:'', fh:'', fm:'' };
             calcConv(sd);
         }
-
         function calcConv(sd) {
             let tot=0;
             conveyorData[sd].forEach(d => {
@@ -606,16 +562,8 @@
             let rem = (12*60)-tot;
             const rh=Math.floor(Math.abs(rem)/60), rm=Math.abs(rem)%60;
             const el=document.getElementById(`eff-${sd}`);
-            
-            if(tot===0) { 
-                el.innerText='-'; 
-                el.dataset.copy='-'; 
-            } else { 
-                el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; 
-                el.dataset.copy=`${th} Jam ${tm} Menit`; 
-            }
+            if(tot===0) { el.innerText='-'; el.dataset.copy='-'; } else { el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; el.dataset.copy=`${th} Jam ${tm} Menit`; }
         }
-
         function calcUnit(id) {
             const val = (s) => parseFloat(document.getElementById(s).value)||0;
             const rs=val(`${id}-run-siang`), ts=val(`${id}-trip-siang`), rm=val(`${id}-run-malam`), tm=val(`${id}-trip-malam`);
@@ -630,9 +578,8 @@
         function addMasterFromForm(type) {
             showModal(`Tambah ${type}`, 'input', (val) => {
                 appData.masters[type].push(val.toUpperCase());
-                saveToStorage();
-                if(type==='unit') renderUnitButtons();
-                else renderSdtList();
+                saveToStorage(); // AUTO SAVE
+                if(type==='unit') renderUnitButtons(); else renderSdtList();
             });
         }
         function renderUnitButtons() {
@@ -665,15 +612,14 @@
             lucide.createIcons();
         }
 
-        // --- COPY & GENERATE TEXT ---
+        // --- COPY & TEXT ---
         function getChecked(id) {
             const c = Array.from(document.querySelectorAll(`#${id} input:checked`)).map(e => e.parentElement.innerText.trim());
             let mId = ''; if(id.includes('spv')) mId = 'inputSupervisorLainnya'; if(id.includes('foreman')) mId = 'inputForemanLainnya'; if(id.includes('checker')) mId = 'inputCheckerLainnya';
             const m = document.getElementById(mId).value.trim(); if(m) c.push(m); return c.join(', ');
         }
-
         function copyReport(isMalam) {
-            saveData(true);
+            saveData(true); // AUTO SAVE
             const shift = document.getElementById('inputShift').value;
             const dateVal = document.getElementById('inputTanggal').value;
             const date = dateVal.split('-');
@@ -705,16 +651,14 @@
             setTimeout(()=>t.classList.add('hidden'), 2300);
         }
 
-        // --- ADMIN PAGE LOGIC FIXED ---
+        // --- ADMIN PAGE (AUTO SAVE FIX) ---
         function renderAdmin() {
             const container = document.getElementById('admin-content');
             container.innerHTML = '';
-            
             const sections = [
                 {k:'spv', l:'Supervisor'}, {k:'foreman', l:'Foreman'}, {k:'checker', l:'Checker'},
                 {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'}
             ];
-
             sections.forEach(sec => {
                 let html = `
                     <div class="border-b border-slate-100 pb-4 last:border-0">
@@ -722,15 +666,9 @@
                             <h3 class="font-bold text-xs text-slate-500 uppercase">${sec.l}</h3>
                             <button onclick="reqAddMaster('${sec.k}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">+ TAMBAH</button>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                `;
+                        <div class="flex flex-wrap gap-2">`;
                 appData.masters[sec.k].forEach(item => {
-                    html += `
-                        <div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
-                            ${item}
-                            <button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button>
-                        </div>
-                    `;
+                    html += `<div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">${item}<button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button></div>`;
                 });
                 html += `</div></div>`;
                 container.innerHTML += html;
@@ -740,17 +678,18 @@
         function reqAddMaster(key) {
             showModal(`Tambah ${key}`, 'input', (val) => {
                 appData.masters[key].push(val.toUpperCase());
+                saveToStorage(); // AUTO SAVE TO CLOUD
                 renderAdmin();
-                initChips(); // Re-render chips to see immediate effect
+                initChips(); // Immediate UI Update
             });
         }
-        
         function reqDelMaster(key, val) {
             showModal(`Hapus ${val}?`, 'confirm', () => {
                 appData.masters[key] = appData.masters[key].filter(x => x !== val);
+                saveToStorage(); // AUTO SAVE TO CLOUD
                 renderAdmin();
-                initChips(); // Re-render chips to see immediate effect
-            }, 'Yakin ingin menghapus data master ini?');
+                initChips(); // Immediate UI Update
+            }, 'Yakin hapus data ini?');
         }
 
     </script>
