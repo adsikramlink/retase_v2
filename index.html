@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efektivitas Running - v3.2 Dynamic Vendor</title>
+    <title>Efektivitas Running - v3.7 Final SDT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -71,7 +71,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
                 <div id="admin-loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center hidden"><div class="spinner border-slate-300 border-t-indigo-600 w-6 h-6"></div></div>
                 <div class="p-4 space-y-6" id="admin-content"></div>
-                <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">Setiap perubahan (Tambah/Hapus) akan otomatis disimpan ke Cloud. <br>User lain perlu menekan tombol <b>Refresh</b> untuk melihat perubahan.</div>
+                <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">Setiap perubahan (Tambah/Hapus) akan otomatis disimpan ke Cloud.</div>
             </div>
         </div>
 
@@ -90,9 +90,8 @@
                     <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Supervisor</label><div id="spvContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputSupervisorLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
                     <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Foreman</label><div id="foremanContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputForemanLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
                     <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Checker</label><div id="checkerContainer" class="flex flex-wrap gap-2 mb-2"></div><input id="inputCheckerLainnya" placeholder="+ Manual" class="text-sm w-full border-b py-1 outline-none focus:border-indigo-500"></div>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="grid grid-cols-1 gap-4 pt-2">
                         <div class="bg-blue-50 p-3 rounded border border-blue-100"><label class="text-[10px] font-bold text-blue-600 block">TIPPING ROM</label><input type="number" id="inputTippingRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-blue-900 outline-none"></div>
-                        <div class="bg-emerald-50 p-3 rounded border border-emerald-100"><label class="text-[10px] font-bold text-emerald-600 block">TRANSFER ROM</label><input type="number" id="inputTransferRom" placeholder="0" class="w-full bg-transparent text-xl font-black text-emerald-900 outline-none"></div>
                     </div>
                 </div>
             </section>
@@ -100,7 +99,7 @@
             <!-- 1. DURASI CONVEYOR -->
             <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
-                    <div><h2 class="font-bold text-slate-700 text-sm">1. Durasi Conveyor</h2><p class="text-[10px] text-slate-400">Hitung Waktu Indikasi</p></div>
+                    <div><h2 class="font-bold text-slate-700 text-sm">1. Durasi Conveyor</h2><p class="text-[10px] text-slate-400">Input Jam Indikasi</p></div>
                     <div class="flex bg-slate-200 p-1 rounded-md"><button onclick="switchTab('SD1')" id="tab-SD1" class="tab-btn active">SD1</button><button onclick="switchTab('SD2')" id="tab-SD2" class="tab-btn">SD2</button><button onclick="switchTab('SD3')" id="tab-SD3" class="tab-btn">SD3</button></div>
                 </div>
                 <div class="p-4">
@@ -108,9 +107,21 @@
                     <div id="container-SD1" class="space-y-2"></div><div id="container-SD2" class="space-y-2 hidden"></div><div id="container-SD3" class="space-y-2 hidden"></div>
                     <button onclick="addTimeRow(activeSD)" class="mt-4 w-full py-3 border border-dashed border-slate-300 text-slate-500 font-bold text-xs rounded hover:bg-slate-50">+ Tambah Baris</button>
                     <div id="results" class="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
-                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD1 Indikasi</div><div id="res-SD1" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD1" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
-                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD2 Indikasi</div><div id="res-SD2" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD2" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
-                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200"><div class="text-[10px] text-slate-400 font-bold">SD3 Indikasi</div><div id="res-SD3" class="text-sm font-black text-slate-800">0j 0m</div><div id="eff-SD3" class="text-[10px] font-bold text-emerald-600">12j 0m</div></div>
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200">
+                            <div class="text-[10px] text-slate-400 font-bold">SD1 Running</div>
+                            <div id="eff-SD1" class="text-sm font-black text-emerald-600" data-copy="-">-</div>
+                            <div id="res-SD1" class="text-[9px] font-bold text-slate-400 mt-1">Indikasi: -</div>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200">
+                            <div class="text-[10px] text-slate-400 font-bold">SD2 Running</div>
+                            <div id="eff-SD2" class="text-sm font-black text-emerald-600" data-copy="-">-</div>
+                            <div id="res-SD2" class="text-[9px] font-bold text-slate-400 mt-1">Indikasi: -</div>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded text-center border border-slate-200">
+                            <div class="text-[10px] text-slate-400 font-bold">SD3 Running</div>
+                            <div id="eff-SD3" class="text-sm font-black text-emerald-600" data-copy="-">-</div>
+                            <div id="res-SD3" class="text-[9px] font-bold text-slate-400 mt-1">Indikasi: -</div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -119,37 +130,31 @@
             <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">2. Perhitungan Unit Running</div>
                 <div class="p-4 space-y-6">
-                    <!-- HEADER -->
                     <div class="grid grid-cols-12 bg-slate-50 font-bold text-[10px] text-slate-400 py-2 border-b border-slate-200 text-center">
-                        <div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div>
+                        <div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT RUNNING</div><div class="col-span-4">TRIP</div><div class="col-span-2">2 TRIP</div>
                     </div>
-                    <!-- DYNAMIC ROWS CONTAINER -->
                     <div id="haulingRowsContainer"></div>
-                    <!-- Total -->
                     <div class="bg-slate-100 p-3 rounded flex justify-between items-center text-sm"><span class="font-bold text-slate-500">Total Hauling</span><span id="grand-total" class="font-black text-indigo-700 text-lg">0 Trip</span></div>
                 </div>
             </section>
 
-            <!-- 3. UNIT SDT RUNNING -->
+            <!-- 3. UNIT SDT RUNNING (MULTI DRIVER FIXED) -->
             <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                     <h2 class="font-bold text-slate-700 text-sm">3. Unit SDT Running</h2>
-                    <button onclick="toggleConfig()" class="text-[10px] text-blue-600 underline font-bold">Config</button>
                 </div>
                 <div class="p-4">
-                    <div id="configPanel" class="hidden bg-blue-50 p-3 rounded-lg border border-blue-100 text-xs mb-4">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="flex gap-1"><input id="newUnit" placeholder="Unit Baru" class="input-base py-1"><button onclick="addMasterFromForm('unit')" class="bg-blue-600 text-white px-2 rounded">+</button></div>
-                            <div class="flex gap-1"><input id="newDriver" placeholder="Driver Baru" class="input-base py-1"><button onclick="addMasterFromForm('driver')" class="bg-emerald-600 text-white px-2 rounded">+</button></div>
-                        </div>
-                    </div>
                     <div class="mb-4"><div id="unitBtnContainer" class="flex flex-wrap gap-2"></div></div>
                     <div id="sdtList" class="space-y-3"></div>
                     <div id="emptyMsg" class="text-center py-6 text-slate-300 text-xs italic border border-dashed rounded mt-2">Belum ada data. Klik tombol unit di atas.</div>
+                    
+                    <div class="bg-slate-100 p-3 rounded flex justify-between items-center text-sm mt-4 border border-slate-200">
+                        <span class="font-bold text-slate-500">Total Trip SDT</span>
+                        <span id="totalSdtDisplay" class="font-black text-indigo-700 text-lg">0 Trip</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Buttons Form -->
             <div class="grid grid-cols-2 gap-3 pb-8">
                 <button onclick="copyReport(false)" class="bg-white border border-purple-200 text-purple-700 font-bold py-3 rounded-xl shadow-sm hover:bg-purple-50 text-xs flex justify-center items-center gap-2"><i data-lucide="sun" class="w-4 h-4"></i> Salin SIANG</button>
                 <button onclick="copyReport(true)" class="bg-white border border-indigo-200 text-indigo-700 font-bold py-3 rounded-xl shadow-sm hover:bg-indigo-50 text-xs flex justify-center items-center gap-2"><i data-lucide="moon" class="w-4 h-4"></i> Salin MALAM</button>
@@ -158,58 +163,42 @@
 
     </div>
 
-    <!-- CUSTOM MODAL -->
+    <!-- MODAL -->
     <div id="customModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60]">
         <div class="bg-white p-6 rounded-xl shadow-xl w-11/12 max-w-sm transform transition-all scale-100">
             <h3 id="modalTitle" class="font-bold text-lg mb-2 text-slate-800">Judul</h3>
             <p id="modalMsg" class="text-sm text-slate-600 mb-4 hidden">Pesan konfirmasi...</p>
             <input id="modalInput" type="text" class="input-base mb-4 hidden" placeholder="Ketik disini...">
+            <div id="driverChecklist" class="hidden max-h-48 overflow-y-auto border border-slate-200 rounded p-2 mb-4 space-y-2"></div>
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal()" class="px-4 py-2 text-slate-500 font-bold text-xs hover:bg-slate-100 rounded">BATAL</button>
                 <button id="modalActionBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs">OK</button>
             </div>
         </div>
     </div>
-
-    <!-- Toast -->
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded shadow-xl text-xs hidden transition-all duration-300 transform translate-y-10 z-50">Teks berhasil disalin!</div>
 
     <script>
-        // --- DATA MANAGEMENT ---
-        let appData = {
-            history: [],
-            masters: {
-                spv: ['Ihsan R', 'Dicky F', 'Sopian'],
-                foreman: ['Gunawan TC', 'Hardiansyah', 'Lewi S', 'Elimelek J', 'Andry K', 'Yulius R'],
-                checker: ['Indra R', 'Jemmie P', 'Ikram', 'Fahri T', 'Indra A', 'Andhy S', 'Agus', 'Angga', 'Henderi A', 'L Fauzan N', 'Nanda P'],
-                pt: ['MHA', 'KARUNIA', 'BUMA'], // Default PT
-                unit: ["01-F", "02-F", "03-F", "3A-F", "05-F", "08-P", "09-P", "10-P", "25-P"],
-                driver: ["Jeksen", "Saipul", "Julio", "Ardianur", "Suryadi", "Agung", "Faturahman"]
-            }
-        };
-
-        // --- GLOBAL STATE ---
+        let appData = { history: [], masters: { spv: [], foreman: [], checker: [], pt: [], unit: [], driver: [] } };
         let activeSD = 'SD1';
         let conveyorData = { SD1:[], SD2:[], SD3:[] };
         let sdtData = [];
         let modalCallback = null;
 
-        // --- HELPERS (NEW) ---
         const toId = (str) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         const getColor = (str) => {
-            const colors = ['bg-orange-500', 'bg-emerald-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+            const colors = ['bg-orange-500', 'bg-emerald-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500', 'bg-pink-500'];
             let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
             return colors[Math.abs(hash) % colors.length];
         };
 
-        // --- INIT ---
         window.onload = () => {
             loadFromStorage();
             if (GOOGLE_SCRIPT_URL) { syncDown(); }
             lucide.createIcons();
             initChips();
             renderUnitButtons();
-            renderHaulingInputs(); // NEW: Render dynamic PT rows
+            renderHaulingInputs();
             renderHistory();
             renderAdmin();
             document.getElementById('inputTanggal').valueAsDate = new Date();
@@ -218,47 +207,33 @@
         function nav(pageId) {
             document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
-            
-            const btnBack = document.getElementById('btnBack');
-            const btnAdmin = document.getElementById('btnAdmin');
-            const btnSave = document.getElementById('btnSave');
-            const navTitle = document.getElementById('navTitle');
-            const navSubtitle = document.getElementById('navSubtitle');
-
-            if(pageId === 'history') {
-                btnBack.classList.add('hidden'); btnAdmin.classList.remove('hidden'); btnSave.classList.add('hidden');
-                navTitle.innerText = "Riwayat Laporan"; navSubtitle.innerText = "List Tersimpan";
-                renderHistory();
-            } else if (pageId === 'form') {
-                btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.remove('hidden');
-                navTitle.innerText = document.getElementById('editId').value ? "Edit Laporan" : "Laporan Baru"; navSubtitle.innerText = "Form Input";
-                renderHaulingInputs(); // Update rows when entering form
-            } else if (pageId === 'admin') {
-                btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.add('hidden');
-                navTitle.innerText = "Pengaturan"; navSubtitle.innerText = "Kelola Master Data";
-                renderAdmin();
-            }
+            const btnBack = document.getElementById('btnBack'), btnAdmin = document.getElementById('btnAdmin'), btnSave = document.getElementById('btnSave'), navTitle = document.getElementById('navTitle'), navSubtitle = document.getElementById('navSubtitle');
+            if(pageId === 'history') { btnBack.classList.add('hidden'); btnAdmin.classList.remove('hidden'); btnSave.classList.add('hidden'); navTitle.innerText = "Riwayat Laporan"; navSubtitle.innerText = "List Tersimpan"; renderHistory(); } 
+            else if (pageId === 'form') { btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.remove('hidden'); navTitle.innerText = document.getElementById('editId').value ? "Edit Laporan" : "Laporan Baru"; navSubtitle.innerText = "Form Input"; renderHaulingInputs(); renderUnitButtons(); } 
+            else if (pageId === 'admin') { btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.add('hidden'); navTitle.innerText = "Pengaturan"; navSubtitle.innerText = "Kelola Master Data"; renderAdmin(); }
             window.scrollTo(0,0);
         }
 
-        // --- DYNAMIC HAULING ROWS (SECTION 2) ---
+        // --- HAULING INPUTS ---
         function renderHaulingInputs() {
             const container = document.getElementById('haulingRowsContainer');
             if(!container) return;
+            const oldValues = {};
+            appData.masters.pt.forEach(pt => {
+                const k = toId(pt);
+                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => {
+                    const el = document.getElementById(`${k}-${s}`);
+                    if(el) oldValues[`${k}-${s}`] = el.value;
+                });
+            });
             container.innerHTML = '';
-            
-            // Check if masters.pt exists (backward compatibility)
             if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
-
             appData.masters.pt.forEach(ptName => {
                 const id = toId(ptName);
                 const colorClass = getColor(ptName);
                 const html = `
                 <div class="mb-4 ptInputGroup" data-pt="${ptName}">
-                    <div class="flex items-center gap-2 mb-1">
-                        <div class="w-2 h-2 rounded-full ${colorClass}"></div>
-                        <span class="text-xs font-bold text-slate-700">${ptName}</span>
-                    </div>
+                    <div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full ${colorClass}"></div><span class="text-xs font-bold text-slate-700">${ptName}</span></div>
                     <div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs">
                         <div class="grid grid-cols-12 py-1 items-center border-b border-slate-100">
                             <div class="col-span-2">☀️</div>
@@ -276,75 +251,67 @@
                 </div>`;
                 container.innerHTML += html;
             });
+            Object.keys(oldValues).forEach(key => { const el = document.getElementById(key); if(el) el.value = oldValues[key]; });
+            calcTotalHauling(); 
         }
 
         // --- STORAGE & SYNC ---
         function loadFromStorage() {
-            const h = localStorage.getItem('chp_history');
-            const m = localStorage.getItem('chp_masters');
+            const h = localStorage.getItem('chp_history'), m = localStorage.getItem('chp_masters');
             if(h) appData.history = JSON.parse(h);
-            if(m) {
-                appData.masters = JSON.parse(m);
-                if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
-            }
+            if(m) appData.masters = JSON.parse(m);
+            if(!appData.masters.pt || appData.masters.pt.length===0) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
+            if(!appData.masters.unit) appData.masters.unit = ["01-F", "02-F", "03-F", "3A-F", "05-F"];
+            if(!appData.masters.driver) appData.masters.driver = ["Jeksen", "Saipul"];
         }
-
         function saveToStorage() {
             localStorage.setItem('chp_history', JSON.stringify(appData.history));
             localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
             if(GOOGLE_SCRIPT_URL) {
                 document.getElementById('progressBar').style.width = '30%';
-                document.getElementById('admin-loading')?.classList.remove('hidden');
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST', mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ history: appData.history, masters: appData.masters })
-                }).then(() => {
-                    document.getElementById('progressBar').style.width = '100%';
-                    document.getElementById('admin-loading')?.classList.add('hidden');
-                    setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500);
-                    showToast("Tersimpan ke Cloud!");
-                }).catch(e => {
-                    document.getElementById('admin-loading')?.classList.add('hidden');
-                    showToast("Tersimpan Lokal (Offline)");
-                });
+                fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: appData.history, masters: appData.masters }) })
+                .then(() => { document.getElementById('progressBar').style.width = '100%'; setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); showToast("Tersimpan ke Cloud!"); })
+                .catch(e => showToast("Tersimpan Lokal (Offline)"));
             } else { showToast("Tersimpan Lokal!"); }
         }
-
         async function syncDown() {
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
-            document.getElementById('progressBar').style.width = '50%';
+            const loading = document.getElementById('loading'); loading.classList.remove('hidden'); document.getElementById('progressBar').style.width = '50%';
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL);
-                const data = await response.json();
-                if (data.history && Array.isArray(data.history)) appData.history = data.history;
-                if (data.masters && typeof data.masters === 'object') {
-                    appData.masters = data.masters;
-                    if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
-                }
+                const response = await fetch(GOOGLE_SCRIPT_URL); const data = await response.json();
+                if (data.history && Array.isArray(data.history)) appData.history = data.history.map(normalizeSdt);
+                if (data.masters && typeof data.masters === 'object') appData.masters = data.masters;
                 localStorage.setItem('chp_history', JSON.stringify(appData.history));
                 localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
-                renderHistory(); renderAdmin(); initChips(); renderHaulingInputs();
-                document.getElementById('progressBar').style.width = '100%';
-                showToast("Data Dipulihkan!");
-            } catch (err) { console.error("Gagal Sync Down:", err); } 
+                renderHistory(); renderAdmin(); initChips(); renderHaulingInputs(); renderUnitButtons();
+                document.getElementById('progressBar').style.width = '100%'; showToast("Data Dipulihkan!");
+            } catch (err) { console.error("Gagal Sync:", err); } 
             finally { loading.classList.add('hidden'); setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); }
         }
         function forceSync() { syncDown(); }
+        // Migration to new structure
+        function normalizeSdt(item) {
+            if(item.sdt && item.sdt.length > 0 && !item.sdt[0].drivers) {
+                item.sdt = item.sdt.map(d => ({
+                    unit: d.unit, drivers: [{name: d.driver||'', jam: '', trip: d.trip||'', ket: d.ket||''}], ket: ''
+                }));
+            }
+            return item;
+        }
 
         // --- MODAL ---
         function showModal(title, type, callback, msgText = '') {
-            const modal = document.getElementById('customModal');
-            const mTitle = document.getElementById('modalTitle');
-            const mInput = document.getElementById('modalInput');
-            const mMsg = document.getElementById('modalMsg');
-            const mBtn = document.getElementById('modalActionBtn');
-            mTitle.innerText = title; modalCallback = callback;
-            if (type === 'input') { mInput.classList.remove('hidden'); mMsg.classList.add('hidden'); mInput.value = ''; setTimeout(() => mInput.focus(), 100); } 
-            else { mInput.classList.add('hidden'); mMsg.classList.remove('hidden'); mMsg.innerText = msgText; }
+            const modal = document.getElementById('customModal'); document.getElementById('modalTitle').innerText = title;
+            const mInput = document.getElementById('modalInput'), mMsg = document.getElementById('modalMsg'), mCheck = document.getElementById('driverChecklist');
+            mInput.classList.add('hidden'); mMsg.classList.add('hidden'); mCheck.classList.add('hidden');
+            if (type === 'input') { mInput.classList.remove('hidden'); mInput.value = ''; setTimeout(() => mInput.focus(), 100); } 
+            else if (type === 'confirm') { mMsg.classList.remove('hidden'); mMsg.innerText = msgText; } 
+            else if (type === 'checklist') { mCheck.classList.remove('hidden'); mCheck.innerHTML = appData.masters.driver.map(d => `<label class="flex items-center gap-2 p-2 border-b last:border-0 hover:bg-slate-50"><input type="checkbox" value="${d}" class="w-4 h-4 text-indigo-600 rounded"><span class="text-xs font-bold text-slate-700">${d}</span></label>`).join(''); }
             modal.classList.remove('hidden');
-            mBtn.onclick = () => { if (type === 'input') { if(mInput.value.trim()) { callback(mInput.value.trim()); closeModal(); } } else { callback(); closeModal(); } };
+            document.getElementById('modalActionBtn').onclick = () => {
+                if (type === 'input') { if(mInput.value.trim()) callback(mInput.value.trim()); }
+                else if (type === 'checklist') { const checked = Array.from(mCheck.querySelectorAll('input:checked')).map(c => c.value); callback(checked); } 
+                else { callback(); } closeModal();
+            };
         }
         function closeModal() { document.getElementById('customModal').classList.add('hidden'); modalCallback = null; }
 
@@ -359,31 +326,14 @@
                     el.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-start";
                     const d = new Date(item.tanggal);
                     const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
-                    el.innerHTML = `
-                        <div class="flex-1 cursor-pointer" onclick="loadReport('${item.id}')">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${item.shift.includes('NIGHT') ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}">${item.shift}</span>
-                                <span class="text-xs font-bold text-slate-500">${dateStr}</span>
-                            </div>
-                            <h3 class="font-bold text-slate-800 text-sm">Total Hauling: ${item.totalHauling}</h3>
-                            <div class="text-[10px] text-slate-400 mt-1 truncate max-w-[200px]">SPV: ${item.spv}</div>
-                        </div>
-                        <div class="flex flex-col gap-2 ml-2">
-                            <button onclick="loadReport('${item.id}')" class="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 text-slate-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                            <button onclick="reqDeleteReport('${item.id}')" class="p-2 bg-red-50 hover:bg-red-100 rounded border border-red-100 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>`;
+                    el.innerHTML = `<div class="flex-1 cursor-pointer" onclick="loadReport('${item.id}')"><div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded ${item.shift.includes('NIGHT') ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}">${item.shift}</span><span class="text-xs font-bold text-slate-500">${dateStr}</span></div><h3 class="font-bold text-slate-800 text-sm">Total Hauling: ${item.totalHauling}</h3><div class="text-[10px] text-slate-400 mt-1 truncate max-w-[200px]">SPV: ${item.spv}</div></div><div class="flex flex-col gap-2 ml-2"><button onclick="loadReport('${item.id}')" class="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 text-slate-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="reqDeleteReport('${item.id}')" class="p-2 bg-red-50 hover:bg-red-100 rounded border border-red-100 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                     c.appendChild(el);
                 });
                 lucide.createIcons();
             }
         }
         function openCreate() { resetForm(); nav('form'); }
-        function reqDeleteReport(id) {
-            showModal('Hapus Laporan?', 'confirm', () => {
-                appData.history = appData.history.filter(x => x.id !== id);
-                saveToStorage(); renderHistory();
-            }, 'Yakin hapus history ini?');
-        }
+        function reqDeleteReport(id) { showModal('Hapus Laporan?', 'confirm', () => { appData.history = appData.history.filter(x => x.id !== id); saveToStorage(); renderHistory(); }, 'Yakin hapus history ini?'); }
 
         // --- FORM LOGIC ---
         function resetForm() {
@@ -394,22 +344,15 @@
             document.getElementById('inputSupervisorLainnya').value = '';
             document.getElementById('inputForemanLainnya').value = '';
             document.getElementById('inputCheckerLainnya').value = '';
-            
-            // Dynamic Reset
+            renderHaulingInputs(); 
             appData.masters.pt.forEach(pt => {
                 const k = toId(pt);
                 const el = document.getElementById(`${k}-run-siang`);
-                if(el) {
-                    ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => document.getElementById(`${k}-${s}`).value = '');
-                    document.getElementById(`${k}-res-siang`).innerText = '0';
-                    document.getElementById(`${k}-res-malam`).innerText = '0';
-                }
+                if(el) { ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => document.getElementById(`${k}-${s}`).value = ''); document.getElementById(`${k}-res-siang`).innerText = '0'; document.getElementById(`${k}-res-malam`).innerText = '0'; }
             });
-
             document.getElementById('grand-total').innerText = '0 Trip';
             document.getElementById('inputTippingRom').value = '';
-            document.getElementById('inputTransferRom').value = '';
-            
+            document.getElementById('totalSdtDisplay').innerText = '0 Trip';
             conveyorData = { SD1:[], SD2:[], SD3:[] };
             ['SD1','SD2','SD3'].forEach(sd => { document.getElementById(`container-${sd}`).innerHTML = ''; addTimeRow(sd); });
             sdtData = []; renderSdtList();
@@ -418,27 +361,15 @@
         function saveData(silent = false) {
             const id = document.getElementById('editId').value || Date.now().toString();
             const data = {
-                id: id, timestamp: Date.now(),
-                shift: document.getElementById('inputShift').value,
-                tanggal: document.getElementById('inputTanggal').value,
+                id: id, timestamp: Date.now(), shift: document.getElementById('inputShift').value, tanggal: document.getElementById('inputTanggal').value,
                 spv: getChecked('spvContainer'), foreman: getChecked('foremanContainer'), checker: getChecked('checkerContainer'),
-                tipping: document.getElementById('inputTippingRom').value, transfer: document.getElementById('inputTransferRom').value,
+                tipping: document.getElementById('inputTippingRom').value,
+                transfer: document.getElementById('totalSdtDisplay').innerText.replace(' Trip',''),
                 conveyor: conveyorData,
                 conveyorRes: { SD1: document.getElementById('eff-SD1').dataset.copy, SD2: document.getElementById('eff-SD2').dataset.copy, SD3: document.getElementById('eff-SD3').dataset.copy },
-                inputs: {},
-                totalHauling: document.getElementById('grand-total').innerText,
-                sdt: sdtData
+                inputs: {}, totalHauling: document.getElementById('grand-total').innerText, sdt: sdtData
             };
-            
-            // Dynamic Input Save
-            appData.masters.pt.forEach(pt => {
-                const k = toId(pt);
-                if(document.getElementById(`${k}-run-siang`)) {
-                    data.inputs[k] = {};
-                    ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { data.inputs[k][s] = document.getElementById(`${k}-${s}`).value; });
-                }
-            });
-
+            appData.masters.pt.forEach(pt => { const k = toId(pt); if(document.getElementById(`${k}-run-siang`)) { data.inputs[k] = {}; ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { data.inputs[k][s] = document.getElementById(`${k}-${s}`).value; }); } });
             const existingIdx = appData.history.findIndex(x => x.id === id);
             if(existingIdx > -1) { appData.history[existingIdx] = data; } else { appData.history.push(data); }
             saveToStorage(); 
@@ -448,43 +379,42 @@
         function loadReport(id) {
             const data = appData.history.find(x => x.id === id);
             if(!data) return;
-            resetForm();
-            document.getElementById('editId').value = data.id;
-            document.getElementById('inputShift').value = data.shift;
-            document.getElementById('inputTanggal').value = data.tanggal;
-            const loadChecks = (cntId, str) => {
-                const arr = str.split(', ');
-                document.querySelectorAll(`#${cntId} input`).forEach(cb => { if(arr.includes(cb.value)) cb.checked = true; });
-            };
-            loadChecks('spvContainer', data.spv); loadChecks('foremanContainer', data.foreman); loadChecks('checkerContainer', data.checker);
-            document.getElementById('inputTippingRom').value = data.tipping; document.getElementById('inputTransferRom').value = data.transfer;
+            const cleanData = normalizeSdt(JSON.parse(JSON.stringify(data))); 
+            resetForm(); 
+            document.getElementById('editId').value = cleanData.id;
+            document.getElementById('inputShift').value = cleanData.shift;
+            document.getElementById('inputTanggal').value = cleanData.tanggal;
+            const loadChecks = (cntId, str) => { const arr = str.split(', '); document.querySelectorAll(`#${cntId} input`).forEach(cb => { if(arr.includes(cb.value)) cb.checked = true; }); };
+            loadChecks('spvContainer', cleanData.spv); loadChecks('foremanContainer', cleanData.foreman); loadChecks('checkerContainer', cleanData.checker);
+            document.getElementById('inputTippingRom').value = cleanData.tipping; 
             ['SD1','SD2','SD3'].forEach(sd => {
                 document.getElementById(`container-${sd}`).innerHTML = '';
-                conveyorData[sd] = data.conveyor[sd];
+                conveyorData[sd] = cleanData.conveyor[sd];
                 conveyorData[sd].forEach((row, idx) => renderTimeRow(sd, idx, row));
                 if(conveyorData[sd].length === 0) addTimeRow(sd);
                 calcConv(sd);
             });
-            // Dynamic Input Load
-            if(data.inputs) {
+            if(cleanData.inputs) {
                 appData.masters.pt.forEach(pt => {
                     const k = toId(pt);
-                    if(data.inputs[k] && document.getElementById(`${k}-run-siang`)) {
-                        ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || ''; });
+                    if(cleanData.inputs[k] && document.getElementById(`${k}-run-siang`)) {
+                        ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { document.getElementById(`${k}-${s}`).value = cleanData.inputs[k][s] || ''; });
                         calcUnit(k);
                     }
                 });
             }
-            sdtData = data.sdt; renderSdtList();
+            sdtData = cleanData.sdt || []; renderSdtList();
             nav('form');
         }
 
-        // --- CALCULATION (DYNAMIC) ---
+        // --- CALCULATION DYNAMIC ---
         function calcUnit(id) {
             const val = (s) => parseFloat(document.getElementById(s).value)||0;
             const rs=val(`${id}-run-siang`), ts=val(`${id}-trip-siang`), rm=val(`${id}-run-malam`), tm=val(`${id}-trip-malam`);
-            document.getElementById(`${id}-res-siang`).innerText = (ts-rs);
-            document.getElementById(`${id}-res-malam`).innerText = ((tm-ts)-rm);
+            const resSiang = ts - rs;
+            const resMalam = (tm > 0 ? (tm - ts) : 0) - rm;
+            document.getElementById(`${id}-res-siang`).innerText = resSiang;
+            document.getElementById(`${id}-res-malam`).innerText = resMalam;
             calcTotalHauling();
         }
 
@@ -494,64 +424,114 @@
                 const k = toId(pt);
                 const val = (s) => parseFloat(document.getElementById(s)?.value)||0;
                 const ts=val(`${k}-trip-siang`), tm=val(`${k}-trip-malam`);
-                tot += (tm - ts);
+                if (tm > 0) { tot += tm; } else { tot += ts; }
             });
             document.getElementById('grand-total').innerText = tot + " Trip";
         }
 
+        function calcSdtTotal() {
+            let tot = 0;
+            sdtData.forEach(d => {
+                d.drivers.forEach(sub => tot += (parseFloat(sub.trip)||0));
+            });
+            document.getElementById('totalSdtDisplay').innerText = tot + " Trip";
+            return tot;
+        }
+
         // --- CHIPS & TIME ---
-        function initChips() { 
-            const mk = (id, list) => document.getElementById(id).innerHTML = list ? list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('') : '';
-            mk('spvContainer', appData.masters.spv); mk('foremanContainer', appData.masters.foreman); mk('checkerContainer', appData.masters.checker);
-        }
-        function switchTab(sd) {
-            activeSD = sd;
-            ['SD1','SD2','SD3'].forEach(n => { document.getElementById(`tab-${n}`).className = `tab-btn ${n===sd?'active':''}`; document.getElementById(`container-${n}`).className = `space-y-2 ${n===sd?'':'hidden'}`; });
-        }
+        function initChips() { const mk = (id, list) => document.getElementById(id).innerHTML = list ? list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('') : ''; mk('spvContainer', appData.masters.spv); mk('foremanContainer', appData.masters.foreman); mk('checkerContainer', appData.masters.checker); }
+        function switchTab(sd) { activeSD = sd; ['SD1','SD2','SD3'].forEach(n => { document.getElementById(`tab-${n}`).className = `tab-btn ${n===sd?'active':''}`; document.getElementById(`container-${n}`).className = `space-y-2 ${n===sd?'':'hidden'}`; }); }
         function addTimeRow(sd) { const idx = conveyorData[sd].length; const emptyRow = { sh:'', sm:'', fh:'', fm:'' }; conveyorData[sd].push(emptyRow); renderTimeRow(sd, idx, emptyRow); }
         function renderTimeRow(sd, idx, data) {
             const div = document.createElement('div'); div.id = `row-${sd}-${idx}`;
             div.className = "grid grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm";
-            div.innerHTML = `
-                <div class="col-span-1 text-center font-bold text-slate-300 text-xs">${idx+1}</div>
-                <div class="col-span-5 time-box"><input type="tel" value="${data.sh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" value="${data.sm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div>
-                <div class="col-span-5 time-box"><input type="tel" value="${data.fh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" value="${data.fm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div>
-                <div class="col-span-1 text-center"><button onclick="delTimeRow('${sd}',${idx})" class="text-slate-300 hover:text-red-500 font-bold">×</button></div>`;
+            div.innerHTML = `<div class="col-span-1 text-center font-bold text-slate-300 text-xs">${idx+1}</div><div class="col-span-5 time-box"><input type="tel" value="${data.sh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" value="${data.sm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div><div class="col-span-5 time-box"><input type="tel" value="${data.fh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" value="${data.fm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div><div class="col-span-1 text-center"><button onclick="delTimeRow('${sd}',${idx})" class="text-slate-300 hover:text-red-500 font-bold">×</button></div>`;
             document.getElementById(`container-${sd}`).appendChild(div);
         }
         function updTime(sd, idx, f, el) { let v = el.value.replace(/\D/g,''); if(v.length>2) v=v.slice(0,2); if(v>23 && (f=='sh'||f=='fh')) v='23'; if(v>59 && (f=='sm'||f=='fm')) v='59'; el.value=v; conveyorData[sd][idx][f]=v; calcConv(sd); }
         function delTimeRow(sd, idx) { document.getElementById(`row-${sd}-${idx}`).style.display='none'; conveyorData[sd][idx] = { sh:'', sm:'', fh:'', fm:'' }; calcConv(sd); }
         function calcConv(sd) {
             let tot=0; conveyorData[sd].forEach(d => { if(d.sh!==''&&d.sm!==''&&d.fh!==''&&d.fm!=='') { let s = parseInt(d.sh)*60+parseInt(d.sm), f = parseInt(d.fh)*60+parseInt(d.fm); if(f<s) f+=1440; tot += (f-s); } });
-            const th=Math.floor(tot/60), tm=tot%60; let rem = (12*60)-tot; const rh=Math.floor(Math.abs(rem)/60), rm=Math.abs(rem)%60;
-            const el=document.getElementById(`eff-${sd}`);
-            document.getElementById(`res-${sd}`).innerText = `${th}j ${tm}m`;
-            if(tot===0) { el.innerText='-'; el.dataset.copy='-'; } else { el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; el.dataset.copy=`${th} Jam ${tm} Menit`; }
+            let runningMins = (12 * 60) - tot; if (runningMins < 0) runningMins = 0; 
+            const rh=Math.floor(runningMins/60), rm=runningMins%60, ih=Math.floor(tot/60), im=tot%60;
+            const elEff = document.getElementById(`eff-${sd}`), elRes = document.getElementById(`res-${sd}`);
+            if(tot === 0) { elEff.innerText = "-"; elEff.dataset.copy = "-"; elRes.innerText = "Indikasi: -"; } 
+            else { elEff.innerText = `${rh}j ${rm}m`; elEff.dataset.copy = `${rh} Jam ${rm} Menit`; elRes.innerText = `Indikasi: ${ih}j ${im}m`; }
         }
 
-        // --- SDT & CONFIG ---
-        function toggleConfig() { document.getElementById('configPanel').classList.toggle('hidden'); }
+        // --- SDT MULTI DRIVER ---
         function addMasterFromForm(type) { showModal(`Tambah ${type}`, 'input', (val) => { appData.masters[type].push(val.toUpperCase()); saveToStorage(); if(type==='unit') renderUnitButtons(); else renderSdtList(); }); }
         function renderUnitButtons() { document.getElementById('unitBtnContainer').innerHTML = appData.masters.unit.map(u => `<button onclick="addSdt('${u}')" class="bg-white border border-slate-300 text-xs font-bold text-slate-600 px-3 py-1 rounded shadow-sm hover:bg-indigo-50 hover:text-indigo-600 transition active:scale-95">${u}</button>`).join(''); }
-        function addSdt(u) { sdtData.push({ unit:u, driver:'', trip:'', ket:'' }); renderSdtList(); setTimeout(() => document.getElementById('sdtList').lastElementChild?.scrollIntoView({behavior:'smooth', block:'center'}), 100); }
-        function delSdt(i) { sdtData.splice(i,1); renderSdtList(); }
-        function updSdt(i, f, v) { sdtData[i][f] = v; }
-        function renderSdtList() {
-            const c = document.getElementById('sdtList'); const m = document.getElementById('emptyMsg'); if(sdtData.length === 0) { c.innerHTML = ''; m.style.display = 'block'; return; } m.style.display = 'none';
-            const drvOpts = `<option value="">Driver...</option>` + appData.masters.driver.map(d=>`<option value="${d}">${d}</option>`).join('');
-            c.innerHTML = sdtData.map((d,i) => `
-                <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-2 relative">
-                    <div class="flex justify-between items-center border-b border-slate-50 pb-1"><span class="font-bold text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">${d.unit}</span><button onclick="delSdt(${i})" class="text-red-400 hover:text-red-600 transition p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
-                    <div class="grid grid-cols-12 gap-2 text-xs"><div class="col-span-5"><select onchange="updSdt(${i},'driver',this.value)" class="w-full border rounded p-1 bg-white outline-none">${drvOpts.replace(`value="${d.driver}"`,`value="${d.driver}" selected`)}</select></div><div class="col-span-3 relative"><input type="number" value="${d.trip}" placeholder="0" oninput="updSdt(${i},'trip',this.value)" class="w-full border rounded p-1 text-center font-bold outline-none"><span class="absolute right-1 top-1.5 text-[8px] text-slate-400 hidden sm:block">Trp</span></div><div class="col-span-4"><input type="text" value="${d.ket}" placeholder="Ket..." oninput="updSdt(${i},'ket',this.value)" class="w-full border rounded p-1 text-red-500 italic outline-none"></div></div></div>`).join('');
-            lucide.createIcons();
+        function addSdt(u) { 
+            // Default 1 empty driver row
+            sdtData.push({ unit:u, drivers:[{name:'', jam:'', trip:'', ket:''}], ket:'' }); 
+            renderSdtList(); setTimeout(() => document.getElementById('sdtList').lastElementChild?.scrollIntoView({behavior:'smooth', block:'center'}), 100); 
+        }
+        function delSdt(i) { sdtData.splice(i,1); renderSdtList(); calcSdtTotal(); }
+        
+        function selectDriver(i) {
+            showModal("Pilih Driver", "checklist", (selected) => {
+                const currentDrivers = sdtData[i].drivers || [];
+                // Rebuild driver list: keep existing data if name matches, else add new
+                const newDrivers = selected.map(name => {
+                    const existing = currentDrivers.find(d => d.name === name);
+                    return existing ? existing : { name: name, jam: '', trip: '', ket: '' };
+                });
+                if (newDrivers.length === 0) newDrivers.push({ name: '', jam: '', trip: '', ket: '' });
+                sdtData[i].drivers = newDrivers;
+                renderSdtList();
+            });
         }
 
-        // --- COPY & TEXT ---
+        // Handle inputs for specific driver sub-row
+        function updSdtSub(i, subIdx, field, val) {
+            sdtData[i].drivers[subIdx][field] = val;
+            if(field === 'trip') calcSdtTotal();
+        }
+
+        function renderSdtList() {
+            const c = document.getElementById('sdtList'); const m = document.getElementById('emptyMsg'); if(sdtData.length === 0) { c.innerHTML = ''; m.style.display = 'block'; calcSdtTotal(); return; } m.style.display = 'none';
+            c.innerHTML = sdtData.map((d,i) => {
+                const isMulti = d.drivers.length > 1;
+                return `
+                <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-2 relative">
+                    <div class="flex justify-between items-center border-b border-slate-50 pb-1">
+                        <span class="font-bold text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">${d.unit}</span>
+                        <div class="flex gap-2">
+                            <button onclick="selectDriver(${i})" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold hover:bg-slate-200">+ Driver</button>
+                            <button onclick="delSdt(${i})" class="text-red-400 hover:text-red-600 transition p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${d.drivers.map((sub, subIdx) => `
+                        <div class="grid grid-cols-12 gap-1 text-xs items-center">
+                            <!-- Driver Name -->
+                            <div class="${isMulti ? 'col-span-3' : 'col-span-4'}"><input type="text" value="${sub.name}" placeholder="Driver" oninput="updSdtSub(${i},${subIdx},'name',this.value)" class="w-full border rounded p-1 bg-white outline-none font-bold"></div>
+                            
+                            <!-- Jam (Only if Multi) -->
+                            ${isMulti ? `<div class="col-span-2"><input type="text" value="${sub.jam}" placeholder="Jam" oninput="updSdtSub(${i},${subIdx},'jam',this.value)" class="w-full border rounded p-1 bg-white outline-none text-center"></div>` : ''}
+                            
+                            <!-- Trip -->
+                            <div class="${isMulti ? 'col-span-2' : 'col-span-3'} relative"><input type="number" value="${sub.trip}" placeholder="0" oninput="updSdtSub(${i},${subIdx},'trip',this.value)" class="w-full border rounded p-1 text-center font-bold outline-none"></div>
+                            
+                            <!-- Keterangan (Individual) -->
+                            <div class="${isMulti ? 'col-span-5' : 'col-span-5'}"><input type="text" value="${sub.ket}" placeholder="Ket..." oninput="updSdtSub(${i},${subIdx},'ket',this.value)" class="w-full border rounded p-1 text-red-500 italic outline-none"></div>
+                        </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+            calcSdtTotal();
+        }
+
+        // --- COPY REPORT FIX ---
         function getChecked(id) {
             const c = Array.from(document.querySelectorAll(`#${id} input:checked`)).map(e => e.parentElement.innerText.trim());
             let mId = ''; if(id.includes('spv')) mId = 'inputSupervisorLainnya'; if(id.includes('foreman')) mId = 'inputForemanLainnya'; if(id.includes('checker')) mId = 'inputCheckerLainnya';
             const m = document.getElementById(mId).value.trim(); if(m) c.push(m); return c.join(', ');
         }
+
         function copyReport(isMalam) {
             saveData(true);
             const shift = document.getElementById('inputShift').value;
@@ -559,28 +539,83 @@
             const date = dateVal.split('-');
             const fmtDate = date.length===3 ? `${date[2]}/${["JAN","FEB","MAR","APR","MEI","JUN","JUL","AGU","SEP","OKT","NOV","DES"][parseInt(date[1])-1]}/${date[0].slice(-2)}` : '-';
             
-            // Dynamic Calc for Text
             let haulingStr = "", unitStr = "";
             let totHauling = 0;
+
             appData.masters.pt.forEach(pt => {
                 const k = toId(pt);
                 if(document.getElementById(`${k}-run-siang`)) {
+                    const rawVal = (id) => document.getElementById(id).value;
                     const val = (id) => parseFloat(document.getElementById(id).value)||0;
-                    const trip = isMalam ? (val(`${k}-trip-malam`) - val(`${k}-trip-siang`)) : val(`${k}-trip-siang`);
-                    const unit = isMalam ? val(`${k}-run-malam`) : val(`${k}-run-siang`);
-                    totHauling += trip;
-                    haulingStr += `- ${pt} = ${trip} TRIP\n`;
-                    unitStr += `- ${pt} = ${unit} Unit\n`;
+                    
+                    const rsVal = val(`${k}-run-siang`), tsVal = val(`${k}-trip-siang`);
+                    const rmVal = val(`${k}-run-malam`), tmVal = val(`${k}-trip-malam`);
+
+                    const hasSiang = rawVal(`${k}-run-siang`) !== "" || rawVal(`${k}-trip-siang`) !== "";
+                    const hasMalam = rawVal(`${k}-run-malam`) !== "" || rawVal(`${k}-trip-malam`) !== "";
+
+                    let tripDisplay = 0, unit2TripDisplay = 0;
+                    let isValidData = false;
+
+                    if (isMalam) {
+                        if (hasMalam) {
+                            tripDisplay = (tmVal > 0) ? (tmVal - tsVal) : 0; 
+                            unit2TripDisplay = tripDisplay - rmVal; 
+                            isValidData = true;
+                        }
+                    } else {
+                        if (hasSiang) {
+                            tripDisplay = tsVal;
+                            unit2TripDisplay = tsVal - rsVal; 
+                            isValidData = true;
+                        }
+                    }
+
+                    if (isValidData) {
+                        haulingStr += `- ${pt} = ${tripDisplay} TRIP\n`;
+                        unitStr += `- ${pt} = ${unit2TripDisplay} Unit\n`;
+                    } else {
+                        haulingStr += `- ${pt} = - TRIP\n`; 
+                        unitStr += `- ${pt} = - Unit\n`;
+                    }
+                    totHauling += tripDisplay;
                 }
             });
 
             const val = (id) => parseFloat(document.getElementById(id).value)||0;
-            const tip = val('inputTippingRom'), trans = val('inputTransferRom');
+            const tipVal = document.getElementById('inputTippingRom').value;
+            const tip = tipVal === "" ? "-" : tipVal + " Trip";
+            
+            const totalSdtTrip = calcSdtTotal();
+            const trans = totalSdtTrip === 0 ? "-" : totalSdtTrip + " Trip";
+
+            let sdtStr = "";
+            if (sdtData.length > 0) {
+                sdtData.forEach(d => {
+                    if (d.drivers.length > 1) {
+                        // Nested format for multi-driver
+                        sdtStr += `- ${d.unit} :\n`;
+                        d.drivers.forEach(sub => {
+                            const jamStr = sub.jam ? ` *${sub.jam}*` : '';
+                            const ketStr = sub.ket ? ` *${sub.ket}*` : '';
+                            sdtStr += `   - ${sub.name||'-'} : ${sub.trip||0} TRIP${jamStr}${ketStr}\n`;
+                        });
+                    } else {
+                        // Single driver format
+                        const sub = d.drivers[0];
+                        const name = sub.name ? `(${sub.name})` : '';
+                        const ketStr = sub.ket ? ` *${sub.ket}*` : '';
+                        sdtStr += `- ${d.unit} ${name} : ${sub.trip||0} Trip${ketStr}\n`;
+                    }
+                });
+            } else { sdtStr = "-\n"; }
+
             const spv = getChecked('spvContainer') || '-', frm = getChecked('foremanContainer') || '-', chk = getChecked('checkerContainer') || '-';
-            let sdtStr = sdtData.length > 0 ? sdtData.map(d => `- ${d.unit} (${d.driver||'-'}) : ${d.trip||0} Trip ${d.ket ? `(${d.ket})` : ''}`).join('\n') : "-\n";
             const sd1 = document.getElementById('eff-SD1').dataset.copy, sd2 = document.getElementById('eff-SD2').dataset.copy, sd3 = document.getElementById('eff-SD3').dataset.copy;
             
-            const txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\n*SUPERVISOR* : ${spv}\n*FOREMAN* : ${frm}\n*CHECKER* :  ${chk}\n\n*EFEKTIFITAS RUNNING*\n- SD1 = ${sd1}\n- SD2 = ${sd2}\n- SD3 = ${sd3}\n\n*HAULING*\n${haulingStr}\n*UNIT 2 TRIP*\n${unitStr}\n*TRIP SDT TRANSFER*\n${sdtStr}\n\n*TOTAL HAULING   = ${totHauling} Trip*\n*TIPPING ROM        = ${tip} Trip*\n*TRANSFER ROM   = ${trans} Trip*\n*TRANSFER ROM + HAULING = ${trans + totHauling} Trip*`;
+            const totalTransHauling = totHauling + totalSdtTrip;
+
+            const txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\n*SUPERVISOR* : ${spv}\n*FOREMAN* : ${frm}\n*CHECKER* :  ${chk}\n\n*EFEKTIFITAS RUNNING*\n- SD1 = ${sd1}\n- SD2 = ${sd2}\n- SD3 = ${sd3}\n\n*HAULING*\n${haulingStr}\n*UNIT 2 TRIP*\n${unitStr}\n*TRIP SDT TRANSFER*\n${sdtStr}\n\n*TOTAL HAULING   = ${totHauling} Trip*\n*TIPPING ROM        = ${tip}*\n*TRANSFER ROM   = ${trans}*\n*TRANSFER ROM + HAULING = ${totalTransHauling} Trip*`;
             
             const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
             showToast("Teks Berhasil Disalin!");
@@ -590,18 +625,15 @@
         // --- ADMIN PAGE ---
         function renderAdmin() {
             const container = document.getElementById('admin-content'); container.innerHTML = '';
-            const sections = [
-                {k:'spv', l:'Supervisor'}, {k:'foreman', l:'Foreman'}, {k:'checker', l:'Checker'},
-                {k:'pt', l:'Vendor / PT'}, {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'}
-            ];
+            const sections = [ {k:'spv', l:'Supervisor'}, {k:'foreman', l:'Foreman'}, {k:'checker', l:'Checker'}, {k:'pt', l:'Vendor / PT'}, {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'} ];
             sections.forEach(sec => {
                 let html = `<div class="border-b border-slate-100 pb-4 last:border-0"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-xs text-slate-500 uppercase">${sec.l}</h3><button onclick="reqAddMaster('${sec.k}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">+ TAMBAH</button></div><div class="flex flex-wrap gap-2">`;
                 appData.masters[sec.k].forEach(item => { html += `<div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">${item}<button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button></div>`; });
                 html += `</div></div>`; container.innerHTML += html;
             });
         }
-        function reqAddMaster(key) { showModal(`Tambah ${key}`, 'input', (val) => { appData.masters[key].push(val.toUpperCase()); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); }); }
-        function reqDelMaster(key, val) { showModal(`Hapus ${val}?`, 'confirm', () => { appData.masters[key] = appData.masters[key].filter(x => x !== val); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); }, 'Yakin hapus data ini?'); }
+        function reqAddMaster(key) { showModal(`Tambah ${key}`, 'input', (val) => { appData.masters[key].push(val.toUpperCase()); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); renderUnitButtons(); }); }
+        function reqDelMaster(key, val) { showModal(`Hapus ${val}?`, 'confirm', () => { appData.masters[key] = appData.masters[key].filter(x => x !== val); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); renderUnitButtons(); }, 'Yakin hapus data ini?'); }
 
     </script>
 </body>
