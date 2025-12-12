@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efektivitas Running - v3.1 Stable</title>
+    <title>Efektivitas Running - v3.2 Dynamic Vendor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; -webkit-tap-highlight-color: transparent; }
-        
-        /* Styles from Original */
         .input-base { width: 100%; background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-weight: 600; outline: none; transition: 0.2s; }
         .input-base:focus { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1); }
         .time-digit { width: 32px; text-align: center; border: none; outline: none; font-weight: 700; color: #334155; background: transparent; }
@@ -21,34 +19,19 @@
         .chip-div { padding: 4px 10px; border-radius: 99px; border: 1px solid #cbd5e1; background: white; color: #64748b; font-size: 11px; font-weight: 700; transition: 0.2s; cursor: pointer; }
         .tab-btn { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #64748b; transition: 0.2s; }
         .tab-btn.active { background: white; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-        /* SPA Styles */
         .page { display: none; padding-bottom: 120px; animation: fadeEffect 0.3s; }
         .page.active { display: block; }
         @keyframes fadeEffect { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
-
-        /* Floating Action Button - FIXED CENTER */
-        .fab {
-            position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px;
-            background-color: #4f46e5; color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); z-index: 50;
-            transition: transform 0.2s;
-        }
+        .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background-color: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); z-index: 50; transition: transform 0.2s; }
         .fab:active { transform: scale(0.95); }
-        
-        /* Loading Overlay */
         #sync-overlay { position: fixed; top:0; left:0; width:100%; height:4px; z-index: 999; background: transparent; pointer-events: none;}
         .progress-bar { height: 100%; background: #4f46e5; width: 0%; transition: width 0.3s; }
-        
-        /* Spinner */
         .spinner { border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-100">
 
-    <!-- Progress Bar Sync -->
     <div id="sync-overlay"><div class="progress-bar" id="progressBar"></div></div>
 
     <!-- Navbar Global -->
@@ -61,17 +44,12 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button id="btnAdmin" onclick="nav('admin')" class="p-2 text-slate-400 hover:text-white rounded-full"><i data-lucide="settings"></i>
-              <button onclick="forceSync()" class="bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-bold py-2 px-4 rounded shadow-sm flex items-center gap-2">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh Data Cloud
-                </button>
-            </button>
+            <button id="btnAdmin" onclick="nav('admin')" class="p-2 text-slate-400 hover:text-white rounded-full"><i data-lucide="settings"></i></button>
             <button id="btnSave" onclick="saveData(false)" class="hidden bg-emerald-600 hover:bg-emerald-700 text-xs font-bold py-2 px-3 rounded flex items-center gap-1"><i data-lucide="save" class="w-4 h-4"></i> SIMPAN</button>
         </div>
     </div>
 
     <!-- CONFIG FOR GOOGLE SHEETS -->
-    <!-- PASTE URL WEB APP GOOGLE SCRIPT ANDA DI BAWAH INI -->
     <script>const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2SsLCoMnBGOZq696cZWXvg7j7_hmpBbWxd-H8nrDSl_VpvxXwhtSNuU16L_fPkOGj/exec";</script>
 
     <div class="max-w-3xl mx-auto mt-6 px-4">
@@ -79,14 +57,8 @@
         <!-- ================= PAGE 1: HISTORY ================= -->
         <div id="page-history" class="page active">
             <div id="history-container" class="space-y-3"></div>
-            <div id="loading" class="hidden text-center text-slate-400 text-xs py-4 flex justify-center items-center gap-2">
-                <div class="spinner"></div> Mengambil data Cloud...
-            </div>
-            <div id="empty-history" class="hidden text-center py-10 text-slate-400 text-sm">
-                Belum ada history laporan.<br>
-                <span class="text-[10px]">(Cek koneksi internet untuk load dari Cloud)</span>
-            </div>
-            
+            <div id="loading" class="hidden text-center text-slate-400 text-xs py-4 flex justify-center items-center gap-2"><div class="spinner"></div> Mengambil data Cloud...</div>
+            <div id="empty-history" class="hidden text-center py-10 text-slate-400 text-sm">Belum ada history laporan.<br><span class="text-[10px]">(Cek koneksi internet untuk load dari Cloud)</span></div>
             <button onclick="openCreate()" class="fab"><i data-lucide="plus" class="w-8 h-8"></i></button>
         </div>
 
@@ -94,24 +66,12 @@
         <div id="page-admin" class="page">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="font-bold text-slate-700">Data Master</h2>
-               
-               
-               
-               
-               
-               
-               
-               
-               
+                <button onclick="forceSync()" class="bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-bold py-2 px-4 rounded shadow-sm flex items-center gap-2"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh Data Cloud</button>
             </div>
-
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
                 <div id="admin-loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center hidden"><div class="spinner border-slate-300 border-t-indigo-600 w-6 h-6"></div></div>
                 <div class="p-4 space-y-6" id="admin-content"></div>
-                <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">
-                    Setiap perubahan (Tambah/Hapus) akan otomatis disimpan ke Cloud. <br>
-                    User lain perlu menekan tombol <b>Refresh</b> untuk melihat perubahan.
-                </div>
+                <div class="px-4 pb-4 text-xs text-slate-400 text-center border-t border-slate-100 pt-4">Setiap perubahan (Tambah/Hapus) akan otomatis disimpan ke Cloud. <br>User lain perlu menekan tombol <b>Refresh</b> untuk melihat perubahan.</div>
             </div>
         </div>
 
@@ -155,16 +115,16 @@
                 </div>
             </section>
 
-            <!-- 2. UNIT RUNNING -->
+            <!-- 2. UNIT RUNNING (DYNAMIC PT) -->
             <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 font-bold text-slate-700 text-sm">2. Perhitungan Unit Running</div>
                 <div class="p-4 space-y-6">
-                    <!-- MHA -->
-                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-orange-500"></div><span class="text-xs font-bold text-slate-700">MHA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="mha-run-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="mha-run-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-4 px-1"><input type="number" id="mha-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('mha')"></div><div class="col-span-2 font-black" id="mha-res-malam">0</div></div></div></div>
-                    <!-- KARUNIA -->
-                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-xs font-bold text-slate-700">KARUNIA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="kai-run-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="kai-run-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-4 px-1"><input type="number" id="kai-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('kai')"></div><div class="col-span-2 font-black" id="kai-res-malam">0</div></div></div></div>
-                    <!-- BUMA -->
-                    <div><div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-yellow-500"></div><span class="text-xs font-bold text-slate-700">BUMA</span></div><div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs"><div class="grid grid-cols-12 bg-slate-50 font-bold text-slate-400 py-2 border-b border-slate-200"><div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div></div><div class="grid grid-cols-12 py-1 items-center border-b border-slate-100"><div class="col-span-2">☀️</div><div class="col-span-4 px-1"><input type="number" id="buma-run-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-siang">0</div></div><div class="grid grid-cols-12 py-1 items-center bg-slate-50/50"><div class="col-span-2">🌙</div><div class="col-span-4 px-1"><input type="number" id="buma-run-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-4 px-1"><input type="number" id="buma-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('buma')"></div><div class="col-span-2 font-black" id="buma-res-malam">0</div></div></div></div>
+                    <!-- HEADER -->
+                    <div class="grid grid-cols-12 bg-slate-50 font-bold text-[10px] text-slate-400 py-2 border-b border-slate-200 text-center">
+                        <div class="col-span-2">SHIFT</div><div class="col-span-4">UNIT</div><div class="col-span-4">TRIP</div><div class="col-span-2">HASIL</div>
+                    </div>
+                    <!-- DYNAMIC ROWS CONTAINER -->
+                    <div id="haulingRowsContainer"></div>
                     <!-- Total -->
                     <div class="bg-slate-100 p-3 rounded flex justify-between items-center text-sm"><span class="font-bold text-slate-500">Total Hauling</span><span id="grand-total" class="font-black text-indigo-700 text-lg">0 Trip</span></div>
                 </div>
@@ -222,6 +182,7 @@
                 spv: ['Ihsan R', 'Dicky F', 'Sopian'],
                 foreman: ['Gunawan TC', 'Hardiansyah', 'Lewi S', 'Elimelek J', 'Andry K', 'Yulius R'],
                 checker: ['Indra R', 'Jemmie P', 'Ikram', 'Fahri T', 'Indra A', 'Andhy S', 'Agus', 'Angga', 'Henderi A', 'L Fauzan N', 'Nanda P'],
+                pt: ['MHA', 'KARUNIA', 'BUMA'], // Default PT
                 unit: ["01-F", "02-F", "03-F", "3A-F", "05-F", "08-P", "09-P", "10-P", "25-P"],
                 driver: ["Jeksen", "Saipul", "Julio", "Ardianur", "Suryadi", "Agung", "Faturahman"]
             }
@@ -233,6 +194,14 @@
         let sdtData = [];
         let modalCallback = null;
 
+        // --- HELPERS (NEW) ---
+        const toId = (str) => str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        const getColor = (str) => {
+            const colors = ['bg-orange-500', 'bg-emerald-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+            let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        };
+
         // --- INIT ---
         window.onload = () => {
             loadFromStorage();
@@ -240,6 +209,7 @@
             lucide.createIcons();
             initChips();
             renderUnitButtons();
+            renderHaulingInputs(); // NEW: Render dynamic PT rows
             renderHistory();
             renderAdmin();
             document.getElementById('inputTanggal').valueAsDate = new Date();
@@ -256,27 +226,56 @@
             const navSubtitle = document.getElementById('navSubtitle');
 
             if(pageId === 'history') {
-                btnBack.classList.add('hidden');
-                btnAdmin.classList.remove('hidden');
-                btnSave.classList.add('hidden');
-                navTitle.innerText = "Riwayat Laporan";
-                navSubtitle.innerText = "List Tersimpan";
+                btnBack.classList.add('hidden'); btnAdmin.classList.remove('hidden'); btnSave.classList.add('hidden');
+                navTitle.innerText = "Riwayat Laporan"; navSubtitle.innerText = "List Tersimpan";
                 renderHistory();
             } else if (pageId === 'form') {
-                btnBack.classList.remove('hidden');
-                btnAdmin.classList.add('hidden');
-                btnSave.classList.remove('hidden');
-                navTitle.innerText = document.getElementById('editId').value ? "Edit Laporan" : "Laporan Baru";
-                navSubtitle.innerText = "Form Input";
+                btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.remove('hidden');
+                navTitle.innerText = document.getElementById('editId').value ? "Edit Laporan" : "Laporan Baru"; navSubtitle.innerText = "Form Input";
+                renderHaulingInputs(); // Update rows when entering form
             } else if (pageId === 'admin') {
-                btnBack.classList.remove('hidden');
-                btnAdmin.classList.add('hidden');
-                btnSave.classList.add('hidden');
-                navTitle.innerText = "Pengaturan";
-                navSubtitle.innerText = "Kelola Master Data";
+                btnBack.classList.remove('hidden'); btnAdmin.classList.add('hidden'); btnSave.classList.add('hidden');
+                navTitle.innerText = "Pengaturan"; navSubtitle.innerText = "Kelola Master Data";
                 renderAdmin();
             }
             window.scrollTo(0,0);
+        }
+
+        // --- DYNAMIC HAULING ROWS (SECTION 2) ---
+        function renderHaulingInputs() {
+            const container = document.getElementById('haulingRowsContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            // Check if masters.pt exists (backward compatibility)
+            if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
+
+            appData.masters.pt.forEach(ptName => {
+                const id = toId(ptName);
+                const colorClass = getColor(ptName);
+                const html = `
+                <div class="mb-4 ptInputGroup" data-pt="${ptName}">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-2 h-2 rounded-full ${colorClass}"></div>
+                        <span class="text-xs font-bold text-slate-700">${ptName}</span>
+                    </div>
+                    <div class="border border-slate-200 rounded-lg overflow-hidden text-center text-xs">
+                        <div class="grid grid-cols-12 py-1 items-center border-b border-slate-100">
+                            <div class="col-span-2">☀️</div>
+                            <div class="col-span-4 px-1"><input type="number" id="${id}-run-siang" class="table-input" placeholder="0" oninput="calcUnit('${id}')"></div>
+                            <div class="col-span-4 px-1"><input type="number" id="${id}-trip-siang" class="table-input" placeholder="0" oninput="calcUnit('${id}')"></div>
+                            <div class="col-span-2 font-black" id="${id}-res-siang">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 py-1 items-center bg-slate-50/50">
+                            <div class="col-span-2">🌙</div>
+                            <div class="col-span-4 px-1"><input type="number" id="${id}-run-malam" class="table-input" placeholder="0" oninput="calcUnit('${id}')"></div>
+                            <div class="col-span-4 px-1"><input type="number" id="${id}-trip-malam" class="table-input" placeholder="0" oninput="calcUnit('${id}')"></div>
+                            <div class="col-span-2 font-black" id="${id}-res-malam">0</div>
+                        </div>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
         }
 
         // --- STORAGE & SYNC ---
@@ -284,25 +283,22 @@
             const h = localStorage.getItem('chp_history');
             const m = localStorage.getItem('chp_masters');
             if(h) appData.history = JSON.parse(h);
-            if(m) appData.masters = JSON.parse(m);
+            if(m) {
+                appData.masters = JSON.parse(m);
+                if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
+            }
         }
 
         function saveToStorage() {
             localStorage.setItem('chp_history', JSON.stringify(appData.history));
             localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
-            
             if(GOOGLE_SCRIPT_URL) {
                 document.getElementById('progressBar').style.width = '30%';
-                document.getElementById('admin-loading')?.classList.remove('hidden'); // Show spinner on admin if active
-                
+                document.getElementById('admin-loading')?.classList.remove('hidden');
                 fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
+                    method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        history: appData.history,
-                        masters: appData.masters
-                    })
+                    body: JSON.stringify({ history: appData.history, masters: appData.masters })
                 }).then(() => {
                     document.getElementById('progressBar').style.width = '100%';
                     document.getElementById('admin-loading')?.classList.add('hidden');
@@ -311,42 +307,30 @@
                 }).catch(e => {
                     document.getElementById('admin-loading')?.classList.add('hidden');
                     showToast("Tersimpan Lokal (Offline)");
-                    console.error(e);
                 });
-            } else {
-                showToast("Tersimpan Lokal!");
-            }
+            } else { showToast("Tersimpan Lokal!"); }
         }
 
         async function syncDown() {
             const loading = document.getElementById('loading');
             loading.classList.remove('hidden');
             document.getElementById('progressBar').style.width = '50%';
-
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
-
-                if (data.history && Array.isArray(data.history)) { appData.history = data.history; }
-                if (data.masters && typeof data.masters === 'object') { appData.masters = data.masters; }
-                
+                if (data.history && Array.isArray(data.history)) appData.history = data.history;
+                if (data.masters && typeof data.masters === 'object') {
+                    appData.masters = data.masters;
+                    if(!appData.masters.pt) appData.masters.pt = ['MHA', 'KARUNIA', 'BUMA'];
+                }
                 localStorage.setItem('chp_history', JSON.stringify(appData.history));
                 localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
-                renderHistory();
-                renderAdmin();
-                initChips(); 
-                
+                renderHistory(); renderAdmin(); initChips(); renderHaulingInputs();
                 document.getElementById('progressBar').style.width = '100%';
                 showToast("Data Dipulihkan!");
-
-            } catch (err) {
-                console.error("Gagal Sync Down:", err);
-            } finally {
-                loading.classList.add('hidden');
-                setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500);
-            }
+            } catch (err) { console.error("Gagal Sync Down:", err); } 
+            finally { loading.classList.add('hidden'); setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); }
         }
-
         function forceSync() { syncDown(); }
 
         // --- MODAL ---
@@ -356,37 +340,19 @@
             const mInput = document.getElementById('modalInput');
             const mMsg = document.getElementById('modalMsg');
             const mBtn = document.getElementById('modalActionBtn');
-
-            mTitle.innerText = title;
-            modalCallback = callback;
-
-            if (type === 'input') {
-                mInput.classList.remove('hidden');
-                mMsg.classList.add('hidden');
-                mInput.value = '';
-                setTimeout(() => mInput.focus(), 100);
-            } else {
-                mInput.classList.add('hidden');
-                mMsg.classList.remove('hidden');
-                mMsg.innerText = msgText;
-            }
-
+            mTitle.innerText = title; modalCallback = callback;
+            if (type === 'input') { mInput.classList.remove('hidden'); mMsg.classList.add('hidden'); mInput.value = ''; setTimeout(() => mInput.focus(), 100); } 
+            else { mInput.classList.add('hidden'); mMsg.classList.remove('hidden'); mMsg.innerText = msgText; }
             modal.classList.remove('hidden');
-            mBtn.onclick = () => {
-                if (type === 'input') {
-                    if(mInput.value.trim()) { callback(mInput.value.trim()); closeModal(); }
-                } else { callback(); closeModal(); }
-            };
+            mBtn.onclick = () => { if (type === 'input') { if(mInput.value.trim()) { callback(mInput.value.trim()); closeModal(); } } else { callback(); closeModal(); } };
         }
         function closeModal() { document.getElementById('customModal').classList.add('hidden'); modalCallback = null; }
 
         // --- HISTORY ---
         function renderHistory() {
-            const c = document.getElementById('history-container');
-            c.innerHTML = '';
-            if(appData.history.length === 0) {
-                document.getElementById('empty-history').classList.remove('hidden');
-            } else {
+            const c = document.getElementById('history-container'); c.innerHTML = '';
+            if(appData.history.length === 0) { document.getElementById('empty-history').classList.remove('hidden'); } 
+            else {
                 document.getElementById('empty-history').classList.add('hidden');
                 [...appData.history].reverse().forEach(item => {
                     const el = document.createElement('div');
@@ -405,8 +371,7 @@
                         <div class="flex flex-col gap-2 ml-2">
                             <button onclick="loadReport('${item.id}')" class="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 text-slate-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                             <button onclick="reqDeleteReport('${item.id}')" class="p-2 bg-red-50 hover:bg-red-100 rounded border border-red-100 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    `;
+                        </div>`;
                     c.appendChild(el);
                 });
                 lucide.createIcons();
@@ -416,8 +381,7 @@
         function reqDeleteReport(id) {
             showModal('Hapus Laporan?', 'confirm', () => {
                 appData.history = appData.history.filter(x => x.id !== id);
-                saveToStorage(); // Auto Save to Cloud on Delete
-                renderHistory();
+                saveToStorage(); renderHistory();
             }, 'Yakin hapus history ini?');
         }
 
@@ -431,55 +395,53 @@
             document.getElementById('inputForemanLainnya').value = '';
             document.getElementById('inputCheckerLainnya').value = '';
             
-            ['mha','kai','buma'].forEach(k => {
-                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => document.getElementById(`${k}-${s}`).value = '');
-                document.getElementById(`${k}-res-siang`).innerText = '0';
-                document.getElementById(`${k}-res-malam`).innerText = '0';
+            // Dynamic Reset
+            appData.masters.pt.forEach(pt => {
+                const k = toId(pt);
+                const el = document.getElementById(`${k}-run-siang`);
+                if(el) {
+                    ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => document.getElementById(`${k}-${s}`).value = '');
+                    document.getElementById(`${k}-res-siang`).innerText = '0';
+                    document.getElementById(`${k}-res-malam`).innerText = '0';
+                }
             });
+
             document.getElementById('grand-total').innerText = '0 Trip';
             document.getElementById('inputTippingRom').value = '';
             document.getElementById('inputTransferRom').value = '';
             
             conveyorData = { SD1:[], SD2:[], SD3:[] };
-            ['SD1','SD2','SD3'].forEach(sd => {
-                document.getElementById(`container-${sd}`).innerHTML = '';
-                addTimeRow(sd); 
-            });
-            sdtData = [];
-            renderSdtList();
+            ['SD1','SD2','SD3'].forEach(sd => { document.getElementById(`container-${sd}`).innerHTML = ''; addTimeRow(sd); });
+            sdtData = []; renderSdtList();
         }
 
         function saveData(silent = false) {
             const id = document.getElementById('editId').value || Date.now().toString();
             const data = {
-                id: id,
-                timestamp: Date.now(),
+                id: id, timestamp: Date.now(),
                 shift: document.getElementById('inputShift').value,
                 tanggal: document.getElementById('inputTanggal').value,
-                spv: getChecked('spvContainer'),
-                foreman: getChecked('foremanContainer'),
-                checker: getChecked('checkerContainer'),
-                tipping: document.getElementById('inputTippingRom').value,
-                transfer: document.getElementById('inputTransferRom').value,
+                spv: getChecked('spvContainer'), foreman: getChecked('foremanContainer'), checker: getChecked('checkerContainer'),
+                tipping: document.getElementById('inputTippingRom').value, transfer: document.getElementById('inputTransferRom').value,
                 conveyor: conveyorData,
-                conveyorRes: {
-                    SD1: document.getElementById('eff-SD1').dataset.copy,
-                    SD2: document.getElementById('eff-SD2').dataset.copy,
-                    SD3: document.getElementById('eff-SD3').dataset.copy
-                },
+                conveyorRes: { SD1: document.getElementById('eff-SD1').dataset.copy, SD2: document.getElementById('eff-SD2').dataset.copy, SD3: document.getElementById('eff-SD3').dataset.copy },
                 inputs: {},
                 totalHauling: document.getElementById('grand-total').innerText,
                 sdt: sdtData
             };
-            ['mha','kai','buma'].forEach(k => {
-                data.inputs[k] = {};
-                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { data.inputs[k][s] = document.getElementById(`${k}-${s}`).value; });
+            
+            // Dynamic Input Save
+            appData.masters.pt.forEach(pt => {
+                const k = toId(pt);
+                if(document.getElementById(`${k}-run-siang`)) {
+                    data.inputs[k] = {};
+                    ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { data.inputs[k][s] = document.getElementById(`${k}-${s}`).value; });
+                }
             });
 
             const existingIdx = appData.history.findIndex(x => x.id === id);
             if(existingIdx > -1) { appData.history[existingIdx] = data; } else { appData.history.push(data); }
-
-            saveToStorage(); // Auto Save to Cloud
+            saveToStorage(); 
             if(!silent) { setTimeout(() => nav('history'), 500); }
         }
 
@@ -494,12 +456,8 @@
                 const arr = str.split(', ');
                 document.querySelectorAll(`#${cntId} input`).forEach(cb => { if(arr.includes(cb.value)) cb.checked = true; });
             };
-            loadChecks('spvContainer', data.spv);
-            loadChecks('foremanContainer', data.foreman);
-            loadChecks('checkerContainer', data.checker);
-            document.getElementById('inputTippingRom').value = data.tipping;
-            document.getElementById('inputTransferRom').value = data.transfer;
-
+            loadChecks('spvContainer', data.spv); loadChecks('foremanContainer', data.foreman); loadChecks('checkerContainer', data.checker);
+            document.getElementById('inputTippingRom').value = data.tipping; document.getElementById('inputTransferRom').value = data.transfer;
             ['SD1','SD2','SD3'].forEach(sd => {
                 document.getElementById(`container-${sd}`).innerHTML = '';
                 conveyorData[sd] = data.conveyor[sd];
@@ -507,118 +465,84 @@
                 if(conveyorData[sd].length === 0) addTimeRow(sd);
                 calcConv(sd);
             });
-            ['mha','kai','buma'].forEach(k => {
-                ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || ''; });
-                calcUnit(k);
-            });
-            sdtData = data.sdt;
-            renderSdtList();
+            // Dynamic Input Load
+            if(data.inputs) {
+                appData.masters.pt.forEach(pt => {
+                    const k = toId(pt);
+                    if(data.inputs[k] && document.getElementById(`${k}-run-siang`)) {
+                        ['run-siang','trip-siang','run-malam','trip-malam'].forEach(s => { document.getElementById(`${k}-${s}`).value = data.inputs[k][s] || ''; });
+                        calcUnit(k);
+                    }
+                });
+            }
+            sdtData = data.sdt; renderSdtList();
             nav('form');
         }
 
-        // --- CHIPS & TIME ---
-        function initChips() { 
-            const mk = (id, list) => document.getElementById(id).innerHTML = list ? list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('') : '';
-            mk('spvContainer', appData.masters.spv); 
-            mk('foremanContainer', appData.masters.foreman); 
-            mk('checkerContainer', appData.masters.checker);
-        }
-        function switchTab(sd) {
-            activeSD = sd;
-            ['SD1','SD2','SD3'].forEach(n => {
-                document.getElementById(`tab-${n}`).className = `tab-btn ${n===sd?'active':''}`;
-                document.getElementById(`container-${n}`).className = `space-y-2 ${n===sd?'':'hidden'}`;
-            });
-        }
-        function addTimeRow(sd) {
-            const idx = conveyorData[sd].length;
-            const emptyRow = { sh:'', sm:'', fh:'', fm:'' };
-            conveyorData[sd].push(emptyRow);
-            renderTimeRow(sd, idx, emptyRow);
-        }
-        function renderTimeRow(sd, idx, data) {
-            const div = document.createElement('div');
-            div.id = `row-${sd}-${idx}`;
-            div.className = "grid grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm";
-            div.innerHTML = `
-                <div class="col-span-1 text-center font-bold text-slate-300 text-xs">${idx+1}</div>
-                <div class="col-span-5 time-box"><input type="tel" value="${data.sh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" value="${data.sm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div>
-                <div class="col-span-5 time-box"><input type="tel" value="${data.fh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" value="${data.fm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div>
-                <div class="col-span-1 text-center"><button onclick="delTimeRow('${sd}',${idx})" class="text-slate-300 hover:text-red-500 font-bold">×</button></div>
-            `;
-            document.getElementById(`container-${sd}`).appendChild(div);
-        }
-        function updTime(sd, idx, f, el) {
-            let v = el.value.replace(/\D/g,''); if(v.length>2) v=v.slice(0,2);
-            if(v>23 && (f=='sh'||f=='fh')) v='23'; if(v>59 && (f=='sm'||f=='fm')) v='59';
-            el.value=v; conveyorData[sd][idx][f]=v;
-            calcConv(sd);
-        }
-        function delTimeRow(sd, idx) {
-            document.getElementById(`row-${sd}-${idx}`).style.display='none';
-            conveyorData[sd][idx] = { sh:'', sm:'', fh:'', fm:'' };
-            calcConv(sd);
-        }
-        function calcConv(sd) {
-            let tot=0;
-            conveyorData[sd].forEach(d => {
-                if(d.sh!==''&&d.sm!==''&&d.fh!==''&&d.fm!=='') {
-                    let s = parseInt(d.sh)*60+parseInt(d.sm), f = parseInt(d.fh)*60+parseInt(d.fm);
-                    if(f<s) f+=1440; tot += (f-s);
-                }
-            });
-            const th=Math.floor(tot/60), tm=tot%60;
-            document.getElementById(`res-${sd}`).innerText = `${th}j ${tm}m`;
-            let rem = (12*60)-tot;
-            const rh=Math.floor(Math.abs(rem)/60), rm=Math.abs(rem)%60;
-            const el=document.getElementById(`eff-${sd}`);
-            if(tot===0) { el.innerText='-'; el.dataset.copy='-'; } else { el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; el.dataset.copy=`${th} Jam ${tm} Menit`; }
-        }
+        // --- CALCULATION (DYNAMIC) ---
         function calcUnit(id) {
             const val = (s) => parseFloat(document.getElementById(s).value)||0;
             const rs=val(`${id}-run-siang`), ts=val(`${id}-trip-siang`), rm=val(`${id}-run-malam`), tm=val(`${id}-trip-malam`);
             document.getElementById(`${id}-res-siang`).innerText = (ts-rs);
             document.getElementById(`${id}-res-malam`).innerText = ((tm-ts)-rm);
-            let tot=0; ['mha','kai','buma'].forEach(k => tot += (val(`${k}-trip-malam`)-val(`${k}-trip-siang`)));
+            calcTotalHauling();
+        }
+
+        function calcTotalHauling() {
+            let tot = 0;
+            appData.masters.pt.forEach(pt => {
+                const k = toId(pt);
+                const val = (s) => parseFloat(document.getElementById(s)?.value)||0;
+                const ts=val(`${k}-trip-siang`), tm=val(`${k}-trip-malam`);
+                tot += (tm - ts);
+            });
             document.getElementById('grand-total').innerText = tot + " Trip";
+        }
+
+        // --- CHIPS & TIME ---
+        function initChips() { 
+            const mk = (id, list) => document.getElementById(id).innerHTML = list ? list.map(n => `<label class="chip-label inline-block mr-2 mb-1"><input type="checkbox" value="${n}" class="hidden"><div class="chip-div">${n}</div></label>`).join('') : '';
+            mk('spvContainer', appData.masters.spv); mk('foremanContainer', appData.masters.foreman); mk('checkerContainer', appData.masters.checker);
+        }
+        function switchTab(sd) {
+            activeSD = sd;
+            ['SD1','SD2','SD3'].forEach(n => { document.getElementById(`tab-${n}`).className = `tab-btn ${n===sd?'active':''}`; document.getElementById(`container-${n}`).className = `space-y-2 ${n===sd?'':'hidden'}`; });
+        }
+        function addTimeRow(sd) { const idx = conveyorData[sd].length; const emptyRow = { sh:'', sm:'', fh:'', fm:'' }; conveyorData[sd].push(emptyRow); renderTimeRow(sd, idx, emptyRow); }
+        function renderTimeRow(sd, idx, data) {
+            const div = document.createElement('div'); div.id = `row-${sd}-${idx}`;
+            div.className = "grid grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-slate-100 shadow-sm";
+            div.innerHTML = `
+                <div class="col-span-1 text-center font-bold text-slate-300 text-xs">${idx+1}</div>
+                <div class="col-span-5 time-box"><input type="tel" value="${data.sh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'sh',this)">:<input type="tel" value="${data.sm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'sm',this)"></div>
+                <div class="col-span-5 time-box"><input type="tel" value="${data.fh}" maxlength="2" placeholder="HH" class="time-digit" oninput="updTime('${sd}',${idx},'fh',this)">:<input type="tel" value="${data.fm}" maxlength="2" placeholder="MM" class="time-digit" oninput="updTime('${sd}',${idx},'fm',this)"></div>
+                <div class="col-span-1 text-center"><button onclick="delTimeRow('${sd}',${idx})" class="text-slate-300 hover:text-red-500 font-bold">×</button></div>`;
+            document.getElementById(`container-${sd}`).appendChild(div);
+        }
+        function updTime(sd, idx, f, el) { let v = el.value.replace(/\D/g,''); if(v.length>2) v=v.slice(0,2); if(v>23 && (f=='sh'||f=='fh')) v='23'; if(v>59 && (f=='sm'||f=='fm')) v='59'; el.value=v; conveyorData[sd][idx][f]=v; calcConv(sd); }
+        function delTimeRow(sd, idx) { document.getElementById(`row-${sd}-${idx}`).style.display='none'; conveyorData[sd][idx] = { sh:'', sm:'', fh:'', fm:'' }; calcConv(sd); }
+        function calcConv(sd) {
+            let tot=0; conveyorData[sd].forEach(d => { if(d.sh!==''&&d.sm!==''&&d.fh!==''&&d.fm!=='') { let s = parseInt(d.sh)*60+parseInt(d.sm), f = parseInt(d.fh)*60+parseInt(d.fm); if(f<s) f+=1440; tot += (f-s); } });
+            const th=Math.floor(tot/60), tm=tot%60; let rem = (12*60)-tot; const rh=Math.floor(Math.abs(rem)/60), rm=Math.abs(rem)%60;
+            const el=document.getElementById(`eff-${sd}`);
+            document.getElementById(`res-${sd}`).innerText = `${th}j ${tm}m`;
+            if(tot===0) { el.innerText='-'; el.dataset.copy='-'; } else { el.innerText=`${th}j ${tm}m (Eff: ${rh}j ${rm}m)`; el.dataset.copy=`${th} Jam ${tm} Menit`; }
         }
 
         // --- SDT & CONFIG ---
         function toggleConfig() { document.getElementById('configPanel').classList.toggle('hidden'); }
-        function addMasterFromForm(type) {
-            showModal(`Tambah ${type}`, 'input', (val) => {
-                appData.masters[type].push(val.toUpperCase());
-                saveToStorage(); // AUTO SAVE
-                if(type==='unit') renderUnitButtons(); else renderSdtList();
-            });
-        }
-        function renderUnitButtons() {
-            document.getElementById('unitBtnContainer').innerHTML = appData.masters.unit.map(u => 
-                `<button onclick="addSdt('${u}')" class="bg-white border border-slate-300 text-xs font-bold text-slate-600 px-3 py-1 rounded shadow-sm hover:bg-indigo-50 hover:text-indigo-600 transition active:scale-95">${u}</button>`
-            ).join('');
-        }
+        function addMasterFromForm(type) { showModal(`Tambah ${type}`, 'input', (val) => { appData.masters[type].push(val.toUpperCase()); saveToStorage(); if(type==='unit') renderUnitButtons(); else renderSdtList(); }); }
+        function renderUnitButtons() { document.getElementById('unitBtnContainer').innerHTML = appData.masters.unit.map(u => `<button onclick="addSdt('${u}')" class="bg-white border border-slate-300 text-xs font-bold text-slate-600 px-3 py-1 rounded shadow-sm hover:bg-indigo-50 hover:text-indigo-600 transition active:scale-95">${u}</button>`).join(''); }
         function addSdt(u) { sdtData.push({ unit:u, driver:'', trip:'', ket:'' }); renderSdtList(); setTimeout(() => document.getElementById('sdtList').lastElementChild?.scrollIntoView({behavior:'smooth', block:'center'}), 100); }
         function delSdt(i) { sdtData.splice(i,1); renderSdtList(); }
         function updSdt(i, f, v) { sdtData[i][f] = v; }
         function renderSdtList() {
-            const c = document.getElementById('sdtList');
-            const m = document.getElementById('emptyMsg');
-            if(sdtData.length === 0) { c.innerHTML = ''; m.style.display = 'block'; return; }
-            m.style.display = 'none';
+            const c = document.getElementById('sdtList'); const m = document.getElementById('emptyMsg'); if(sdtData.length === 0) { c.innerHTML = ''; m.style.display = 'block'; return; } m.style.display = 'none';
             const drvOpts = `<option value="">Driver...</option>` + appData.masters.driver.map(d=>`<option value="${d}">${d}</option>`).join('');
             c.innerHTML = sdtData.map((d,i) => `
                 <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-2 relative">
-                    <div class="flex justify-between items-center border-b border-slate-50 pb-1">
-                        <span class="font-bold text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">${d.unit}</span>
-                        <button onclick="delSdt(${i})" class="text-red-400 hover:text-red-600 transition p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                    <div class="grid grid-cols-12 gap-2 text-xs">
-                        <div class="col-span-5"><select onchange="updSdt(${i},'driver',this.value)" class="w-full border rounded p-1 bg-white outline-none">${drvOpts.replace(`value="${d.driver}"`,`value="${d.driver}" selected`)}</select></div>
-                        <div class="col-span-3 relative"><input type="number" value="${d.trip}" placeholder="0" oninput="updSdt(${i},'trip',this.value)" class="w-full border rounded p-1 text-center font-bold outline-none"><span class="absolute right-1 top-1.5 text-[8px] text-slate-400 hidden sm:block">Trp</span></div>
-                        <div class="col-span-4"><input type="text" value="${d.ket}" placeholder="Ket..." oninput="updSdt(${i},'ket',this.value)" class="w-full border rounded p-1 text-red-500 italic outline-none"></div>
-                    </div>
-                </div>
-            `).join('');
+                    <div class="flex justify-between items-center border-b border-slate-50 pb-1"><span class="font-bold text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">${d.unit}</span><button onclick="delSdt(${i})" class="text-red-400 hover:text-red-600 transition p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                    <div class="grid grid-cols-12 gap-2 text-xs"><div class="col-span-5"><select onchange="updSdt(${i},'driver',this.value)" class="w-full border rounded p-1 bg-white outline-none">${drvOpts.replace(`value="${d.driver}"`,`value="${d.driver}" selected`)}</select></div><div class="col-span-3 relative"><input type="number" value="${d.trip}" placeholder="0" oninput="updSdt(${i},'trip',this.value)" class="w-full border rounded p-1 text-center font-bold outline-none"><span class="absolute right-1 top-1.5 text-[8px] text-slate-400 hidden sm:block">Trp</span></div><div class="col-span-4"><input type="text" value="${d.ket}" placeholder="Ket..." oninput="updSdt(${i},'ket',this.value)" class="w-full border rounded p-1 text-red-500 italic outline-none"></div></div></div>`).join('');
             lucide.createIcons();
         }
 
@@ -629,78 +553,55 @@
             const m = document.getElementById(mId).value.trim(); if(m) c.push(m); return c.join(', ');
         }
         function copyReport(isMalam) {
-            saveData(true); // AUTO SAVE
+            saveData(true);
             const shift = document.getElementById('inputShift').value;
             const dateVal = document.getElementById('inputTanggal').value;
             const date = dateVal.split('-');
             const fmtDate = date.length===3 ? `${date[2]}/${["JAN","FEB","MAR","APR","MEI","JUN","JUL","AGU","SEP","OKT","NOV","DES"][parseInt(date[1])-1]}/${date[0].slice(-2)}` : '-';
-            const getUnitCount = (vnd) => isMalam ? (document.getElementById(`${vnd}-run-malam`).value || 0) : (document.getElementById(`${vnd}-run-siang`).value || 0);
-            const val = (id) => parseFloat(document.getElementById(id).value)||0;
-            const calcTrip = (b) => isMalam ? (val(`${b}-trip-malam`)-val(`${b}-trip-siang`)) : val(`${b}-trip-siang`);
+            
+            // Dynamic Calc for Text
+            let haulingStr = "", unitStr = "";
+            let totHauling = 0;
+            appData.masters.pt.forEach(pt => {
+                const k = toId(pt);
+                if(document.getElementById(`${k}-run-siang`)) {
+                    const val = (id) => parseFloat(document.getElementById(id).value)||0;
+                    const trip = isMalam ? (val(`${k}-trip-malam`) - val(`${k}-trip-siang`)) : val(`${k}-trip-siang`);
+                    const unit = isMalam ? val(`${k}-run-malam`) : val(`${k}-run-siang`);
+                    totHauling += trip;
+                    haulingStr += `- ${pt} = ${trip} TRIP\n`;
+                    unitStr += `- ${pt} = ${unit} Unit\n`;
+                }
+            });
 
-            const tripMha = calcTrip('mha'), tripKai = calcTrip('kai'), tripBuma = calcTrip('buma');
-            const totHauling = tripMha + tripKai + tripBuma;
+            const val = (id) => parseFloat(document.getElementById(id).value)||0;
             const tip = val('inputTippingRom'), trans = val('inputTransferRom');
             const spv = getChecked('spvContainer') || '-', frm = getChecked('foremanContainer') || '-', chk = getChecked('checkerContainer') || '-';
-
             let sdtStr = sdtData.length > 0 ? sdtData.map(d => `- ${d.unit} (${d.driver||'-'}) : ${d.trip||0} Trip ${d.ket ? `(${d.ket})` : ''}`).join('\n') : "-\n";
             const sd1 = document.getElementById('eff-SD1').dataset.copy, sd2 = document.getElementById('eff-SD2').dataset.copy, sd3 = document.getElementById('eff-SD3').dataset.copy;
-
-            const txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\n*SUPERVISOR* : ${spv}\n*FOREMAN* : ${frm}\n*CHECKER* :  ${chk}\n\n*EFEKTIFITAS RUNNING*\n- SD1 = ${sd1}\n- SD2 = ${sd2}\n- SD3 = ${sd3}\n\n*HAULING*\n- MHA   = ${tripMha} TRIP\n- KARUNIA = ${tripKai} TRIP\n- BUMA  = ${tripBuma} TRIP\n\n*UNIT 2 TRIP*\n- MHA   = ${getUnitCount('mha')} Unit\n- KARUNIA = ${getUnitCount('kai')} Unit\n- BUMA  = ${getUnitCount('buma')} Unit\n\n*TRIP SDT TRANSFER*\n${sdtStr}\n\n*TOTAL HAULING   = ${totHauling} Trip*\n*TIPPING ROM        = ${tip} Trip*\n*TRANSFER ROM   = ${trans} Trip*\n*TRANSFER ROM + HAULING = ${trans + totHauling} Trip*`;
-
-            const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
+            
+            const txt = `*CHP OPERATION*\n*${shift}*\n*${fmtDate}*\n\n*SUPERVISOR* : ${spv}\n*FOREMAN* : ${frm}\n*CHECKER* :  ${chk}\n\n*EFEKTIFITAS RUNNING*\n- SD1 = ${sd1}\n- SD2 = ${sd2}\n- SD3 = ${sd3}\n\n*HAULING*\n${haulingStr}\n*UNIT 2 TRIP*\n${unitStr}\n*TRIP SDT TRANSFER*\n${sdtStr}\n\n*TOTAL HAULING   = ${totHauling} Trip*\n*TIPPING ROM        = ${tip} Trip*\n*TRANSFER ROM   = ${trans} Trip*\n*TRANSFER ROM + HAULING = ${trans + totHauling} Trip*`;
+            
+            const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
             showToast("Teks Berhasil Disalin!");
         }
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.remove('hidden','translate-y-10'); setTimeout(()=>t.classList.add('translate-y-10'), 2000); setTimeout(()=>t.classList.add('hidden'), 2300); }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.remove('hidden','translate-y-10');
-            setTimeout(()=>t.classList.add('translate-y-10'), 2000); 
-            setTimeout(()=>t.classList.add('hidden'), 2300);
-        }
-
-        // --- ADMIN PAGE (AUTO SAVE FIX) ---
+        // --- ADMIN PAGE ---
         function renderAdmin() {
-            const container = document.getElementById('admin-content');
-            container.innerHTML = '';
+            const container = document.getElementById('admin-content'); container.innerHTML = '';
             const sections = [
                 {k:'spv', l:'Supervisor'}, {k:'foreman', l:'Foreman'}, {k:'checker', l:'Checker'},
-                {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'}
+                {k:'pt', l:'Vendor / PT'}, {k:'unit', l:'Unit SDT'}, {k:'driver', l:'Driver SDT'}
             ];
             sections.forEach(sec => {
-                let html = `
-                    <div class="border-b border-slate-100 pb-4 last:border-0">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="font-bold text-xs text-slate-500 uppercase">${sec.l}</h3>
-                            <button onclick="reqAddMaster('${sec.k}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">+ TAMBAH</button>
-                        </div>
-                        <div class="flex flex-wrap gap-2">`;
-                appData.masters[sec.k].forEach(item => {
-                    html += `<div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">${item}<button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button></div>`;
-                });
-                html += `</div></div>`;
-                container.innerHTML += html;
+                let html = `<div class="border-b border-slate-100 pb-4 last:border-0"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-xs text-slate-500 uppercase">${sec.l}</h3><button onclick="reqAddMaster('${sec.k}')" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">+ TAMBAH</button></div><div class="flex flex-wrap gap-2">`;
+                appData.masters[sec.k].forEach(item => { html += `<div class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">${item}<button onclick="reqDelMaster('${sec.k}','${item}')" class="text-slate-400 hover:text-red-500 ml-1">×</button></div>`; });
+                html += `</div></div>`; container.innerHTML += html;
             });
         }
-
-        function reqAddMaster(key) {
-            showModal(`Tambah ${key}`, 'input', (val) => {
-                appData.masters[key].push(val.toUpperCase());
-                saveToStorage(); // AUTO SAVE TO CLOUD
-                renderAdmin();
-                initChips(); // Immediate UI Update
-            });
-        }
-        function reqDelMaster(key, val) {
-            showModal(`Hapus ${val}?`, 'confirm', () => {
-                appData.masters[key] = appData.masters[key].filter(x => x !== val);
-                saveToStorage(); // AUTO SAVE TO CLOUD
-                renderAdmin();
-                initChips(); // Immediate UI Update
-            }, 'Yakin hapus data ini?');
-        }
+        function reqAddMaster(key) { showModal(`Tambah ${key}`, 'input', (val) => { appData.masters[key].push(val.toUpperCase()); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); }); }
+        function reqDelMaster(key, val) { showModal(`Hapus ${val}?`, 'confirm', () => { appData.masters[key] = appData.masters[key].filter(x => x !== val); saveToStorage(); renderAdmin(); initChips(); renderHaulingInputs(); }, 'Yakin hapus data ini?'); }
 
     </script>
 </body>
