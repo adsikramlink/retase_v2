@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efektivitas Running - v3.7 Final SDT</title>
+    <title>Efektivitas Running - v3.8 Auto Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -138,7 +138,7 @@
                 </div>
             </section>
 
-            <!-- 3. UNIT SDT RUNNING (MULTI DRIVER FIXED) -->
+            <!-- 3. UNIT SDT RUNNING -->
             <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                 <div class="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                     <h2 class="font-bold text-slate-700 text-sm">3. Unit SDT Running</h2>
@@ -195,6 +195,10 @@
         window.onload = () => {
             loadFromStorage();
             if (GOOGLE_SCRIPT_URL) { syncDown(); }
+            
+            // AUTO SYNC LISTENER (NEW for v3.8)
+            window.addEventListener('online', checkAutoSync);
+
             lucide.createIcons();
             initChips();
             renderUnitButtons();
@@ -255,7 +259,7 @@
             calcTotalHauling(); 
         }
 
-        // --- STORAGE & SYNC ---
+        // --- STORAGE & SYNC (IMPROVED FOR AUTO SYNC) ---
         function loadFromStorage() {
             const h = localStorage.getItem('chp_history'), m = localStorage.getItem('chp_masters');
             if(h) appData.history = JSON.parse(h);
@@ -264,16 +268,44 @@
             if(!appData.masters.unit) appData.masters.unit = ["01-F", "02-F", "03-F", "3A-F", "05-F"];
             if(!appData.masters.driver) appData.masters.driver = ["Jeksen", "Saipul"];
         }
+
         function saveToStorage() {
             localStorage.setItem('chp_history', JSON.stringify(appData.history));
             localStorage.setItem('chp_masters', JSON.stringify(appData.masters));
             if(GOOGLE_SCRIPT_URL) {
-                document.getElementById('progressBar').style.width = '30%';
-                fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: appData.history, masters: appData.masters }) })
-                .then(() => { document.getElementById('progressBar').style.width = '100%'; setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); showToast("Tersimpan ke Cloud!"); })
-                .catch(e => showToast("Tersimpan Lokal (Offline)"));
+                // If online, send immediately
+                if (navigator.onLine) {
+                    performSync();
+                } else {
+                    // Mark as needed sync
+                    localStorage.setItem('needSync', 'true');
+                    showToast("Tersimpan Lokal (Offline)");
+                }
             } else { showToast("Tersimpan Lokal!"); }
         }
+
+        function performSync() {
+            document.getElementById('progressBar').style.width = '30%';
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: appData.history, masters: appData.masters }) })
+            .then(() => { 
+                document.getElementById('progressBar').style.width = '100%'; 
+                setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); 
+                localStorage.removeItem('needSync'); // Clear flag
+                showToast("Tersimpan ke Cloud!"); 
+            })
+            .catch(e => {
+                localStorage.setItem('needSync', 'true'); // Retry later
+                showToast("Gagal Upload (Disimpan Lokal)");
+            });
+        }
+
+        function checkAutoSync() {
+            if (navigator.onLine && localStorage.getItem('needSync') === 'true') {
+                showToast("Koneksi Kembali! Mengupload data...");
+                performSync();
+            }
+        }
+
         async function syncDown() {
             const loading = document.getElementById('loading'); loading.classList.remove('hidden'); document.getElementById('progressBar').style.width = '50%';
             try {
@@ -288,7 +320,7 @@
             finally { loading.classList.add('hidden'); setTimeout(() => document.getElementById('progressBar').style.width = '0%', 500); }
         }
         function forceSync() { syncDown(); }
-        // Migration to new structure
+        
         function normalizeSdt(item) {
             if(item.sdt && item.sdt.length > 0 && !item.sdt[0].drivers) {
                 item.sdt = item.sdt.map(d => ({
